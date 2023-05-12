@@ -1,0 +1,7 @@
+name = "VPLRayTracer"
+uuid = "78485975-e4aa-407d-b3bb-ded5a4265d05"
+authors = ["Alejandro Morales Sierra <alejandro.moralessierra@wur.nl> and contributors"]
+version = "0.0.1"
+
+[compat]
+julia = "1.9"
