@@ -2,5 +2,6 @@ using VPLRayTracer
 using Test
 
 @testset "VPLRayTracer.jl" begin
-    # Write your tests here.
+    include("elements_raytracer.jl")
+    #include("scenes_raytracer.jl")
 end
