@@ -1,14 +1,14 @@
 ```@meta
-CurrentModule = VPLRayTracer
+CurrentModule = PlantRayTracer
 ```
 
-# VPLRayTracer
+# PlantRayTracer
 
-Documentation for [VPLRayTracer](https://github.com/AleMorales/VPLRayTracer.jl).
+Documentation for [PlantRayTracer](https://github.com/AleMorales/PlantRayTracer.jl).
 
 ```@index
 ```
 
 ```@autodocs
-Modules = [VPLRayTracer]
+Modules = [PlantRayTracer]
 ```

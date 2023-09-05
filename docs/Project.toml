@@ -1,3 +1,3 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-VPLRayTracer = "78485975-e4aa-407d-b3bb-ded5a4265d05"
+PlantRayTracer = "78485975-e4aa-407d-b3bb-ded5a4265d05"

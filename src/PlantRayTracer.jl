@@ -1,4 +1,4 @@
-module VPLRayTracer
+module PlantRayTracer
 
 
 # Dependencies from Julia's standard library
@@ -17,7 +17,7 @@ import StatsBase: sample, Weights
 import ColorTypes: RGBA
 
 # VPL dependencies
-import VPLGeom: Vec, O, X, Y, Z, Mesh, areas,
+import PlantGeomPrimitives: Vec, O, X, Y, Z, Mesh, areas,
                    ntriangles, Ellipse, rotate!, translate!, BBox,
                    Scene, vertices, mesh, faces, material_ids, materials,
                    Material, add!

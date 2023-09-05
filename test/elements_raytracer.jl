@@ -1,7 +1,7 @@
-import VPLRayTracer as RT
-import VPLRayTracer
-using VPLRayTracer
-import VPLGeom
+import PlantRayTracer as RT
+import PlantRayTracer
+using PlantRayTracer
+import PlantGeomPrimitives
 using Test
 import LinearAlgebra: ⋅, norm
 import Random
@@ -204,7 +204,7 @@ for i in 1:10
 end
 
 # Area source
-r = VPLGeom.Rectangle(length = 2.0, width = 2.0);
+r = PlantGeomPrimitives.Rectangle(length = 2.0, width = 2.0);
 source = RT.AreaSource(r)
 source.tvec isa Vector
 @test first(source.tvec) isa RT.Triangle
@@ -219,7 +219,7 @@ for i in 1:10
     @test 0.0 <= p[3] <= 2.0
 end
 
-r = VPLGeom.Rectangle(length = 3.0, width = 2.5);
+r = PlantGeomPrimitives.Rectangle(length = 3.0, width = 2.5);
 source = RT.AreaSource(r)
 @test sum(source.areas) ≈ 3*2.5
 for i in 1:10
