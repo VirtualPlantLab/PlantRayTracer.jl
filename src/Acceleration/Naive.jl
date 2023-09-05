@@ -20,7 +20,7 @@ function Naive(triangles, ids, rule = nothing)
 end
 
 # Return closest hit (if any)
-function intersect(ray::Ray{FT}, acc::Naive, nodestack, dstack, dmin) where FT
+function intersect(ray::Ray{FT}, acc::Naive, nodestack, dstack, dmin) where {FT}
     @inbounds begin
         #dmin = Inf
         frontmin = true
@@ -38,10 +38,10 @@ function intersect(ray::Ray{FT}, acc::Naive, nodestack, dstack, dmin) where FT
             return false, Intersection(FT), dmin
         else
             triangle = acc.triangles[posmin]
-            intersection = Intersection(ray.o .+ dmin.*ray.dir, # pint
-                                        axes(triangle),         # axes
-                                        frontmin,               # front
-                                        acc.id[posmin])         # material
+            intersection = Intersection(ray.o .+ dmin .* ray.dir, # pint
+                axes(triangle),         # axes
+                frontmin,               # front
+                acc.id[posmin])         # material
             return true, intersection, dmin
         end
     end

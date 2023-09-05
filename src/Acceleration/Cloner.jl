@@ -1,6 +1,5 @@
 ### This file DOES NOT contain public API ###
 
-
 ###############################################################################
 ################### Grid cloner with transformation nodes #####################
 ###############################################################################
@@ -13,7 +12,7 @@ struct TNODE{FT}
 end
 
 # Shortcut to create intermediate TNODES in the binary tree of the grid cloner
-TNODE(box::AABB{FT}, leaf) where FT = TNODE(box, leaf, Vec{FT}(0,0,0))
+TNODE(box::AABB{FT}, leaf) where {FT} = TNODE(box, leaf, Vec{FT}(0, 0, 0))
 
 # Structure that contains the binary tree required to traverse the grid cloner
 struct GridCloner{FT}
@@ -24,8 +23,8 @@ end
 # Create a grid cloner around an acceleration structure
 # Create (2*n + 1) clones in each x or y direction -> symmetry enforced by odd numbers
 # Create n in z direction (always go up)
-function GridCloner(acc::Acceleration{FT}; nx = 3, ny = 3, nz = 0, 
-                   dx = nothing, dy = nothing, dz = nothing) where {FT}
+function GridCloner(acc::Acceleration{FT}; nx = 3, ny = 3, nz = 0,
+    dx = nothing, dy = nothing, dz = nothing) where {FT}
     # Note that nothing is a special case to signal that dx, dy and dz should
     # be derived from the bounding box
     dx == nothing && (dx = acc.gbox.max[1] - acc.gbox.min[1])
@@ -33,7 +32,9 @@ function GridCloner(acc::Acceleration{FT}; nx = 3, ny = 3, nz = 0,
     dz == nothing && (dz = acc.gbox.max[3] - acc.gbox.min[3])
     # Special case when the global box is empty
     gbox = acc.gbox
-    isempty(acc.gbox) || nx == ny == nz == 0 && (return GridCloner(GVector([TNODE(gbox, true, Vec{FT}(0,0,0))]), 1))
+    isempty(acc.gbox) ||
+        nx == ny == nz == 0 &&
+            (return GridCloner(GVector([TNODE(gbox, true, Vec{FT}(0, 0, 0))]), 1))
     # Create all the leaf TNODES, their centers and indices
     scene = create_tnodes(nx, ny, nz, dx, dy, dz, gbox)
     indices = collect(1:length(scene.nodes))
@@ -47,13 +48,13 @@ function GridCloner(acc::Acceleration{FT}; nx = 3, ny = 3, nz = 0,
 end
 
 # Create all the transformation nodes in the grid
-function create_tnodes(nx, ny, nz, dx::FT, dy::FT, dz::FT, box) where FT
+function create_tnodes(nx, ny, nz, dx::FT, dy::FT, dz::FT, box) where {FT}
     # Total number of tnodes in the grid
-    nnodes = (2*nx + 1)*(2*ny + 1)*(nz + 1)
+    nnodes = (2 * nx + 1) * (2 * ny + 1) * (nz + 1)
 
     # Special case when only one node in the grid cloner
     if nnodes == 1
-        leaves = [TNODE(box, true, Vec{FT}(0,0,0))]
+        leaves = [TNODE(box, true, Vec{FT}(0, 0, 0))]
         centers = hcat(FT(0), FT(0), FT(0))
         return leaves, centers
     end
@@ -64,21 +65,20 @@ function create_tnodes(nx, ny, nz, dx::FT, dy::FT, dz::FT, box) where FT
     centers = zeros(FT, nnodes, 3)
     p0 = center(box)
     counter = 0
-    for i in -nx:1:nx
-        for j in -ny:1:ny
+    for i in (-nx):1:nx
+        for j in (-ny):1:ny
             for k in 0:1:nz
                 counter += 1
-                disp = Vec{FT}(i*dx, j*dy, k*dz)
+                disp = Vec{FT}(i * dx, j * dy, k * dz)
                 nbox = AABB(box.min .+ disp, box.max .+ disp)
                 nodes[counter] = TNODE(nbox, true, disp)
                 boxes[counter] = nbox
-                centers[counter,:] = p0 .+ disp
+                centers[counter, :] = p0 .+ disp
             end
         end
     end
     return (nodes = nodes, centers = centers, boxes = boxes)
 end
-
 
 ###############################################################################
 ######################### Grid cloner construction ############################
@@ -90,7 +90,7 @@ function addNode!(grid::GridCloner, scene, parentbox, parentid, indices)
     newindices, childrenboxes, leaves = splitnode(grid, parentbox, indices, scene)
     # Ids of the children in the flattened version of the tree. 
     # First child of a node with order i is given by 2i + 1
-    nodesid = Tuple(2*parentid + i for i = 1:2)
+    nodesid = Tuple(2 * parentid + i for i in 1:2)
     # Add children to nodes
     pushnodes!(grid, scene, nodesid, childrenboxes, newindices, leaves)
     # Recursion trigerred for children that are inner nodes (depth-first construction)
@@ -109,15 +109,15 @@ end
 # The rule is simple: Always split along the longest axis and do it in the middle
 function splitnode(grid::GridCloner, parentbox, indices, scene)
     # Find the longest distance among centers along axes
-    centers = scene.centers[indices,:]
+    centers = scene.centers[indices, :]
     distances = (maximum(centers[:, 1]) - minimum(centers[:, 1]),
-                 maximum(centers[:, 2]) - minimum(centers[:, 2]),
-                 maximum(centers[:, 3]) - minimum(centers[:, 3]))
+        maximum(centers[:, 2]) - minimum(centers[:, 2]),
+        maximum(centers[:, 3]) - minimum(centers[:, 3]))
     index = findmax(distances)[2]
     # Split along the chosen axis (arithmetic mean is good enough for TNODEs)
-    pos = mean(centers[:,index])
+    pos = mean(centers[:, index])
     # Distribute the nodes according to position of centers relative to pos
-    leftindices = indices[centers[:,index] .< pos]
+    leftindices = indices[centers[:, index] .< pos]
     rightindices = setdiff(indices, leftindices)
     # Create bounding boxes for inner nodes
     leftbox = AABB(scene.boxes, leftindices)
@@ -125,7 +125,9 @@ function splitnode(grid::GridCloner, parentbox, indices, scene)
     # Determine if the children should be leaf nodes
     leaves = (length(leftindices) == 1, length(rightindices) == 1)
     # Return the new indices and bounding boxes
-    (newindices = (leftindices, rightindices), childrenboxes = (leftbox, rightbox), leaves = leaves)
+    (newindices = (leftindices, rightindices),
+        childrenboxes = (leftbox, rightbox),
+        leaves = leaves)
 end
 
 # Add TNODEs to the grid cloner (either pre-constructed leaf nodes or create new inner node)
@@ -141,20 +143,18 @@ function pushnodes!(grid::GridCloner, scene, nodesid, childrenboxes, newindices,
     return nothing
 end
 
-
 ###############################################################################
 ########################### Grid cloner traversal #############################
 ###############################################################################
 
-
 # Traverse the grid cloner (if a leaf TNODE is hit, update the ray and traverse the scene)
-function Base.intersect(ray::Ray{FT}, grid::GridCloner, acc::Acceleration{FT}, tnodestack, 
-                        tdstack, nodestack, dstack) where FT
+function Base.intersect(ray::Ray{FT}, grid::GridCloner, acc::Acceleration{FT}, tnodestack,
+    tdstack, nodestack, dstack) where {FT}
     #@inbounds begin
     begin
         # Initialize solution state
         dmin = Inf
-        disp = Vec{FT}(0,0,0) # Do we still need to return disp?
+        disp = Vec{FT}(0, 0, 0) # Do we still need to return disp?
         hit = false
         intersection = Intersection(FT)
         # Special case when we only have one node (go directly to acceleration structure)
@@ -165,15 +165,19 @@ function Base.intersect(ray::Ray{FT}, grid::GridCloner, acc::Acceleration{FT}, t
         # Check the two children of the global box to start the process
         update!(tnodestack, tdstack, 1, ray, grid, dmin)
         # Depth-first traversal using LIFO stack
-        while(length(tnodestack) > 0)
+        while (length(tnodestack) > 0)
             # Pop the next node and hit distance from the stack
             nodecur = pop!(tnodestack)
             node = grid.nodes[nodecur]
             dnode = pop!(tdstack)
             # If the node is a leaf, update the ray and traverse the accelerated scene
-            if node.leaf && dnode < dmin 
+            if node.leaf && dnode < dmin
                 ray_disp = Ray(ray.o .- node.disp, ray.dir)
-                l_hit, l_intersection, l_dmin = intersect(ray_disp, acc, nodestack, dstack, dmin)
+                l_hit, l_intersection, l_dmin = intersect(ray_disp,
+                    acc,
+                    nodestack,
+                    dstack,
+                    dmin)
                 # If it hits a triangle inside the node, update everything
                 if l_hit && l_dmin < dmin
                     dmin = l_dmin
@@ -181,9 +185,9 @@ function Base.intersect(ray::Ray{FT}, grid::GridCloner, acc::Acceleration{FT}, t
                     intersection = l_intersection
                     disp = node.disp
                 end
-            # If the node is inner, compute the index of the first child and update nodestack
+                # If the node is inner, compute the index of the first child and update nodestack
             else
-                childid = 2*nodecur + 1
+                childid = 2 * nodecur + 1
                 update!(tnodestack, tdstack, childid, ray, grid, dmin)
             end
         end
@@ -204,7 +208,7 @@ function update!(tnodestack, tdstack, i, ray, grid::GridCloner, dmin)
         # TODO: Avoid redundant operation on d1 and d2 when sorting?
         push!(tdstack, d1)
         push!(tdstack, d2)
-    # If only one (or none) of the nodes are hit
+        # If only one (or none) of the nodes are hit
     else
         hit1 && push!(tnodestack, i)
         hit2 && push!(tnodestack, i + 1)

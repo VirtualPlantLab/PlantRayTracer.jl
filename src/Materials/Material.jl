@@ -34,7 +34,6 @@ function reset!(materials::Vector{<:Material})
     end
 end
 
-
 """
     power(material::Material)
 

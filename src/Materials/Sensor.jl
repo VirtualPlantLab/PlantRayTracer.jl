@@ -33,7 +33,7 @@ end
 #=
     Add all the power to the material but do not affect the power of the ray
 =#
-@inbounds function absorb_power!(material::Sensor, power, interaction) 
+@inbounds function absorb_power!(material::Sensor, power, interaction)
     for i in eachindex(power)
         material.power[i] += power[i] #Threads.atomic_add!(material.power[i], power[i])
     end
@@ -43,6 +43,11 @@ end
 #=
     Just return the same ray but displaced a certain distance
 =#
-function generate_ray(material::Sensor, ray::Ray{FT}, disp::Vec{FT}, intersection, interaction, rng) where FT 
-    Ray(intersection.pint .+ ray.dir.*eps(FT).*FT(2), ray.dir, ray.idir, ray.extra)
+function generate_ray(material::Sensor,
+    ray::Ray{FT},
+    disp::Vec{FT},
+    intersection,
+    interaction,
+    rng) where {FT}
+    Ray(intersection.pint .+ ray.dir .* eps(FT) .* FT(2), ray.dir, ray.idir, ray.extra)
 end

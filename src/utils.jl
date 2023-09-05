@@ -22,7 +22,7 @@ wavelengths/wavebands to be simulated in a ray tracer.
 rho(vals...) = SVector(vals)
 
 # Get n random numbers from standard uniform, that is, U(0,1)
-runif(rng, ::Val{n}, ::Type{t}) where {n,t} = NTuple{n,t}(rand(rng,t) for i in 1:n)
+runif(rng, ::Val{n}, ::Type{t}) where {n, t} = NTuple{n, t}(rand(rng, t) for i in 1:n)
 
 ###############################################################################
 ################################## Geometry ###################################
@@ -32,9 +32,9 @@ runif(rng, ::Val{n}, ::Type{t}) where {n,t} = NTuple{n,t}(rand(rng,t) for i in 1
 # angles θ and  Φ
 function polar_to_cartesian(axes, θ, Φ)
     e1, e2, n = axes
-    dir1 = @. n*cos(θ)
-    dir2 = @. e1*cos(Φ)*sin(θ)
-    dir3 = @. e2*sin(Φ)*sin(θ)
+    dir1 = @. n * cos(θ)
+    dir2 = @. e1 * cos(Φ) * sin(θ)
+    dir3 = @. e2 * sin(Φ) * sin(θ)
     dir = @. dir1 + dir2 + dir3
     Vec(normalize(dir))
 end
@@ -43,7 +43,7 @@ end
 function project(p, pp, pn)
     v = p .- pp
     dist = v ⋅ pn
-    p .- dist.*pn
+    p .- dist .* pn
 end
 
 # Help write coordinate transformations
@@ -52,15 +52,13 @@ rotatex(x) = LinearMap(RotX(x))
 rotatey(x) = LinearMap(RotY(x))
 rotatez(x) = LinearMap(RotZ(x))
 
-
 # Given angles θ and Φ, calculate the flipped coordinate system of the plane
 # Φ clockwise looking against Z - East is positive
 # θ counterclock wise looking against Y - Sunrise is positive
-function rotate_coordinates(θ::FT, Φ::FT) where FT
+function rotate_coordinates(θ::FT, Φ::FT) where {FT}
     rot = rotatez(-Φ) ∘ rotatex(-θ)
     (x = .-rot(X(FT)), y = .-rot(Y(FT)), z = .-rot(Z(FT)))
 end
-
 
 ###############################################################################
 ################################## GVector ####################################
@@ -78,7 +76,7 @@ end
 Base.IndexStyle(::Type{<:GVector}) = IndexLinear()
 
 @inline function Base.getindex(v::GVector, i::Int)
-    @boundscheck checkbounds(v.data,i)
+    @boundscheck checkbounds(v.data, i)
     @inbounds return v.data[i]
 end
 

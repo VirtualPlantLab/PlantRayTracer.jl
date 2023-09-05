@@ -12,14 +12,14 @@ Directional sources may generate incorrect results in the absence of a grid clon
 that extendes the scenes. This is because the rays are generated from the upper
 face of the scene's bounding box. See VPL documentation for details on light sources.
 """
-function DirectionalSource(box::AABB; θ, Φ, radiosity, nrays) 
+function DirectionalSource(box::AABB; θ, Φ, radiosity, nrays)
     dir_geom = create_directional(box)
     # Radiosity is assumed to be project onto horizontal plane
     # The code below ensures that we get the right irradiance onto the scene
-    power = radiosity*area(dir_geom)# base_area(box) -> from earlier version
-    Source(dir_geom, FixedSource(θ, Φ), power/nrays, nrays)
+    power = radiosity * area(dir_geom)# base_area(box) -> from earlier version
+    Source(dir_geom, FixedSource(θ, Φ), power / nrays, nrays)
 end
-function DirectionalSource(scene::Scene; θ, Φ, radiosity, nrays) 
+function DirectionalSource(scene::Scene; θ, Φ, radiosity, nrays)
     box = AABB(scene)
     DirectionalSource(box, θ = θ, Φ = Φ, radiosity = radiosity, nrays = nrays)
 end
@@ -36,22 +36,22 @@ struct Directional{FT} <: SourceGeometry
     xmin::FT
     xmax::FT
     ymin::FT
-    ymax::FT 
-    zmax::FT   
+    ymax::FT
+    zmax::FT
 end
 
 # Calculate the area of the directional light source
-area(d::Directional) = (d.xmax - d.xmin)*(d.ymax - d.ymin)
+area(d::Directional) = (d.xmax - d.xmin) * (d.ymax - d.ymin)
 
 # Create geometry for a directional light source
-function create_directional(box::AABB{FT}) where FT
+function create_directional(box::AABB{FT}) where {FT}
     @inbounds Directional(box.min[1], box.max[1], box.min[2], box.max[2], box.max[3])
 end
 
 # Select a random point from the upper face of the scene's AABB
-function generate_point(d::Directional{FT}, rng) where FT
-    x = d.xmin + rand(rng, FT)*(d.xmax - d.xmin)
-    y = d.ymin + rand(rng, FT)*(d.ymax - d.ymin)
+function generate_point(d::Directional{FT}, rng) where {FT}
+    x = d.xmin + rand(rng, FT) * (d.xmax - d.xmin)
+    y = d.ymin + rand(rng, FT) * (d.ymax - d.ymin)
     Vec(x, y, d.zmax + 5eps(FT))
 end
 

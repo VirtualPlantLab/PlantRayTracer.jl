@@ -10,7 +10,7 @@ struct Intersection{FT}
     front::Bool
     id::Int64
 end
-function Intersection(::Type{FT}) where FT 
+function Intersection(::Type{FT}) where {FT}
     f = zero(FT)
     v = Vec(f, f, f)
     Intersection(v, (v, v, v), false, 0)

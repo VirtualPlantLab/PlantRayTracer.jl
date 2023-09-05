@@ -10,7 +10,6 @@ import Aqua
         Aqua.test_ambiguities([PlantRayTracer])
     end
 
-
     include("elements_raytracer.jl")
     #include("scenes_raytracer.jl")
 end

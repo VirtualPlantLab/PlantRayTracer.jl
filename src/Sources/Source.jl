@@ -2,7 +2,6 @@
 # Source
 # get_nw
 
-
 #= Define the following methods for a SourceGeometry:
     generate_point(g::SourceGeometry, rng) -> Return a Vec representing origin of the ray
 =#
@@ -29,7 +28,6 @@ struct Source{G, A, nw}
     nrays::Int
 end
 
-
 """
     Source(geom, angle, power::Number, nrays)
     Source(geom, angle, power::Tuple, nrays)
@@ -40,8 +38,12 @@ wavelength simultaneously, a tuple of power values should be given, of the same 
 in the materials used in the scene. See VPL documentation for details on source geometries 
 and source angles.
 """
-Source(geom, angle, power::Number, nrays::Integer) = Source(geom, angle, SVector{1, Float64}(power), nrays)
-Source(geom, angle, power::Tuple, nrays::Integer) = Source(geom, angle, SVector{length(power), Float64}(power...), nrays)
+function Source(geom, angle, power::Number, nrays::Integer)
+    Source(geom, angle, SVector{1, Float64}(power), nrays)
+end
+function Source(geom, angle, power::Tuple, nrays::Integer)
+    Source(geom, angle, SVector{length(power), Float64}(power...), nrays)
+end
 
 """
     get_nw(s::Source)
@@ -60,6 +62,6 @@ function shoot_ray!(source::Source, power, rng)
     power .= source.power
     # Generate the origin and direction of the ray
     origin = generate_point(source, rng)
-    dir    = generate_direction(source, rng)
+    dir = generate_direction(source, rng)
     return Ray(origin, dir)
 end

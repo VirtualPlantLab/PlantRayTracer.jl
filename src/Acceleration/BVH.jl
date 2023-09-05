@@ -3,7 +3,6 @@
 # SAH
 # AvgSplit
 
-
 ###############################################################################
 ############################## Boxed triangles ################################
 ###############################################################################
@@ -23,7 +22,7 @@ function BoxedTriangles(tris::Vector{<:Triangle}, ids::Vector{Int})
 end
 
 # Compute the AABBs and the center for each triangle
-function wrap(tris::Vector{Triangle{FT}}) where FT
+function wrap(tris::Vector{Triangle{FT}}) where {FT}
     #@inbounds begin
     begin
         nt = length(tris)
@@ -31,7 +30,7 @@ function wrap(tris::Vector{Triangle{FT}}) where FT
         cx = zeros(FT, nt)
         cy = similar(cx)
         cz = similar(cx)
-        for i = 1:nt
+        for i in 1:nt
             cx[i], cy[i], cz[i] = center(boxes[i])
         end
         return boxes, (cx, cy, cz)
@@ -46,7 +45,6 @@ end
 # Using 0-indexing, the first child of an inner node with order i in a tree of
 # arity n is given by i*n + 1 (we assume binary tree so n = 2). Since the firt node
 # is the global box (which we do not store), index 1 and 2 correspond to the children
-
 
 # Each node in the acceleration structure (an AABB, flag on whether it is a leaf or not and index for
 # the triangle packet)
@@ -87,14 +85,25 @@ end
 
 # Recursive function that splits a gbox into N nodes, distributes triangles
 # and adds nodes to the list of nodes and triangles
-function addNode!(bvh::BVH, scene::BoxedTriangles, parentbox, parentid, indices, level, rule)
+function addNode!(bvh::BVH,
+    scene::BoxedTriangles,
+    parentbox,
+    parentid,
+    indices,
+    level,
+    rule)
     # Distribute triangles among N children and determine whether children are leaves
-    children, newindices, childrenboxes, leaves = splitnode(bvh, parentbox, indices, scene, level, rule)
+    children, newindices, childrenboxes, leaves = splitnode(bvh,
+        parentbox,
+        indices,
+        scene,
+        level,
+        rule)
     # If we decide to split the node
     if children
         # Ids of the children in the flattened version of the tree. 
         # First child of a node with order i is given by 2i + 1
-        nodesid = Tuple(2*parentid + i for i = 1:2)
+        nodesid = Tuple(2 * parentid + i for i in 1:2)
         # Add children to nodes
         pushnodes!(bvh, scene, nodesid, childrenboxes, leaves, newindices)
         # Recursion trigerred for children that are inner nodes (depth-first construction)
@@ -116,7 +125,6 @@ function addNode!(bvh::BVH, scene::BoxedTriangles, parentbox, parentid, indices,
     return nothing
 end
 
-
 ###############################################################################
 ############################## Node splitting #################################
 ###############################################################################
@@ -134,11 +142,10 @@ function splitnode(bvh::BVH{FT}, box, indices, scene, level, rule) where {FT}
     if level + 1 >= rule.maxL
         leaves = (true, true)
     else
-        leaves = Tuple(length(newindices[i]) <= rule.minN ? true : false for i = 1:2)
+        leaves = Tuple(length(newindices[i]) <= rule.minN ? true : false for i in 1:2)
     end
     return true, newindices, childrenboxes, leaves
 end
-
 
 # Distribute triangles into the children depending on the position of AABB centers 
 # relative to the split plane
@@ -169,28 +176,29 @@ node along the longest axis through the mean coordinate value. The rule is
 parameterized by the minimum number of triangles in a leaf node (`minN`) and the
 maximum depth of the tree (`maxL`).
 """
-struct AvgSplit 
+struct AvgSplit
     minN::Int # Minimum number of triangles in a leaf node
     maxL::Int # Maximum depth of the tree
 end
 
 # Split a node using a simple average rule
-function split(bvh::BVH{FT}, box, indices, scene, rule::AvgSplit) where FT
+function split(bvh::BVH{FT}, box, indices, scene, rule::AvgSplit) where {FT}
     #@inbounds begin
     begin
         # Choose the axis that is longest
         axis = findmax(box.max .- box.min)[2]
-        pos  = sum(scene.centers[axis][indices])/length(indices)
+        pos = sum(scene.centers[axis][indices]) / length(indices)
         # Distribute triangles between the two children
         newindices = distribute(axis, pos, indices, scene)
         # Sometimes all centers have the same axis coordinate so we cannot cut through there
-        any(length.(newindices) .== 0) && (return Inf, (scene.boxes[1], scene.boxes[1]), newindices)
+        any(length.(newindices) .== 0) &&
+            (return Inf, (scene.boxes[1], scene.boxes[1]), newindices)
         # Compute the new boxes
         A = AABB(scene.boxes, newindices[1])
         B = AABB(scene.boxes, newindices[2])
         # Return axis that was split, the AABBs of the children nodes and the indices for the triangles
         # contained within the two children
-        return axis, (A,B), newindices
+        return axis, (A, B), newindices
     end
 end
 
@@ -214,14 +222,14 @@ struct SAH{K}
     maxL::Int # Maximum depth of the tree
 end
 
-nsplits(::SAH{K}) where K = K
+nsplits(::SAH{K}) where {K} = K
 
 # Split a node using a SAH rule
 function split(bvh::BVH{FT}, box, indices, scene, rule::SAH{K}) where {FT, K}
     #@inbounds begin
     begin
         # Compute baseline for partial SAH cost
-        best_cost = area(box)*length(indices)
+        best_cost = area(box) * length(indices)
         best_axis = 0
         best_pos = zero(FT)
         best_childrenboxes = (box, box)
@@ -231,13 +239,13 @@ function split(bvh::BVH{FT}, box, indices, scene, rule::SAH{K}) where {FT, K}
         # TODO: Can pre-allocate the array holding sorted centers??
         scenters = Tuple(sort(scene.centers[i][indices]) for i in 1:3)
         # Loop over all possible splits, compute SAH and update the best option so far if needed
-        for i in 1:3K
+        for i in 1:(3K)
             axis, pos = split_box(rule, scenters, i)
             costs = sah_cost(axis, pos, indices, scene)
             if costs[1] < best_cost
-                best_cost   = costs[1]
-                best_axis   = axis
-                best_pos    = pos
+                best_cost = costs[1]
+                best_axis = axis
+                best_pos = pos
                 best_childrenboxes = (costs[2], costs[3])
                 best_newindices = costs[4]
             end
@@ -247,10 +255,10 @@ function split(bvh::BVH{FT}, box, indices, scene, rule::SAH{K}) where {FT, K}
 end
 
 # Calculat the ith split according to the rule (assume quantile cuts)
-function split_box(rule::SAH{K}, scenters, i) where K
+function split_box(rule::SAH{K}, scenters, i) where {K}
     axis = div(i - 1, K) + 1
-    iax = i - (axis - 1)*K
-    pos = quantile(scenters[axis], iax/(K + 1), sorted = true)
+    iax = i - (axis - 1) * K
+    pos = quantile(scenters[axis], iax / (K + 1), sorted = true)
     return axis, pos
 end
 
@@ -261,7 +269,8 @@ function sah_cost(axis, pos, indices, scene)
         # Distribute triangles between the two children
         newindices = distribute(axis, pos, indices, scene)
         # Sometimes all centers have the same axis coordinate so we cannot cut through there
-        any(length.(newindices) .== 0) && (return Inf, scene.boxes[1], scene.boxes[1], newindices)
+        any(length.(newindices) .== 0) &&
+            (return Inf, scene.boxes[1], scene.boxes[1], newindices)
         # Compute the SA and SB
         A = AABB(scene.boxes, newindices[1])
         B = AABB(scene.boxes, newindices[2])
@@ -270,17 +279,16 @@ function sah_cost(axis, pos, indices, scene)
         NA = length(newindices[1])
         SB = area(B)
         NB = length(newindices[2])
-        return SA*NA + SB*NB, A, B, newindices
+        return SA * NA + SB * NB, A, B, newindices
     end
 end
-
 
 ###############################################################################
 ############################# BVH construction ################################
 ###############################################################################
 
 # Create acceleration nodes and push them onto the array representation of the tree
-function pushnodes!(bvh::BVH, scene, nodesid,  childrenbox, leaves, newindices)
+function pushnodes!(bvh::BVH, scene, nodesid, childrenbox, leaves, newindices)
     #@inbounds 
     for i in 1:2
         if leaves[i]
@@ -295,14 +303,12 @@ function pushnodes!(bvh::BVH, scene, nodesid,  childrenbox, leaves, newindices)
     return nothing
 end
 
-
-
 ###############################################################################
 ############################### BVH traversal #################################
 ###############################################################################
 
 # Return closest hit (if any)
-function Base.intersect(ray::Ray{FT}, acc::BVH, nodestack, dstack, dmin) where FT
+function Base.intersect(ray::Ray{FT}, acc::BVH, nodestack, dstack, dmin) where {FT}
     #@inbounds begin
     begin
         # Initialize statistics of minimum
@@ -316,7 +322,7 @@ function Base.intersect(ray::Ray{FT}, acc::BVH, nodestack, dstack, dmin) where F
         end
         # TODO: Since we traverse depth-first, we should store distance to AABB intersection in a stack to avoid unnecessary work
         # Depth-first traversal using LIFO stack
-        while(length(nodestack) > 0)
+        while (length(nodestack) > 0)
             nodecur = pop!(nodestack)
             node = acc.nodes[nodecur]
             dnode = pop!(dstack)
@@ -337,9 +343,9 @@ function Base.intersect(ray::Ray{FT}, acc::BVH, nodestack, dstack, dmin) where F
                         tri_id = (node.tris, i)
                     end
                 end
-            # If the node is inner, compute the index of the first child and update nodestack
+                # If the node is inner, compute the index of the first child and update nodestack
             elseif !node.leaf
-                childid = 2*nodecur + 1
+                childid = 2 * nodecur + 1
                 # Bug that needs to be fixed (is it a problem in the creation of the BVH or the tracing?)
                 if childid > length(acc.nodes)
                     @error "I reached a node that should be a leaf as it points to non-existent children: $nodecur"
@@ -353,22 +359,20 @@ function Base.intersect(ray::Ray{FT}, acc::BVH, nodestack, dstack, dmin) where F
             return false, Intersection(FT), dmin
         else
             triangle = acc.tris[tri_id[1]][tri_id[2]]
-            intersection = Intersection(ray.o .+ dmin.*ray.dir, # pint
-                                        axes(triangle),           # axes
-                                        frontmin,                 # front
-                                        acc.ids[tri_id[1]][tri_id[2]])  # id of material
+            intersection = Intersection(ray.o .+ dmin .* ray.dir, # pint
+                axes(triangle),           # axes
+                frontmin,                 # front
+                acc.ids[tri_id[1]][tri_id[2]])  # id of material
             return true, intersection, dmin
         end
     end
-
 end
-
 
 # Check intersection with two children and store them in the nodestack
 function update!(nodestack, dstack, i, ray, acc::BVH, dmin)
     # Intersect the two nodes
     hit1, d1 = intersect(ray, acc.nodes[i], dmin)
-    hit2, d2 = intersect(ray, acc.nodes[i+1], dmin)
+    hit2, d2 = intersect(ray, acc.nodes[i + 1], dmin)
     # If both nodes are hit, store them in the order of hit
     if hit1 && hit2
         first, second, d1, d2 = ifelse(d1 < d2, (i, i + 1, d1, d2), (i + 1, i, d2, d1))
@@ -377,7 +381,7 @@ function update!(nodestack, dstack, i, ray, acc::BVH, dmin)
         # TODO: Avoid redundant operation on d1 and d2 when sorting?
         push!(dstack, d1)
         push!(dstack, d2)
-    # If only one (or none) of the nodes are hit
+        # If only one (or none) of the nodes are hit
     else
         hit1 && push!(nodestack, i)
         hit2 && push!(nodestack, i + 1)

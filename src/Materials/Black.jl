@@ -31,7 +31,7 @@ end
 #=
     Add all the power to the material and set power to 0
 =#
-function absorb_power!(material::Black, power, interaction) 
+function absorb_power!(material::Black, power, interaction)
     material.power .+= power
     power .= 0.0
     return nothing
@@ -40,6 +40,11 @@ end
 #=
     Just return a ray (we will never get here due to Russian roulette if it is black surface)
 =#
-function generate_ray(material::Black, ray::Vec{FT}, disp::Vec{FT}, intersection, interaction, rng) where {FT}
-    Ray(O(FT) , O(FT))
+function generate_ray(material::Black,
+    ray::Vec{FT},
+    disp::Vec{FT},
+    intersection,
+    interaction,
+    rng) where {FT}
+    Ray(O(FT), O(FT))
 end

@@ -19,7 +19,6 @@ end
 
 generate_point(g::PointSource, rng) = g.loc
 
-
 """
     LineSource(p, line)
 
@@ -32,12 +31,11 @@ struct LineSource{FT} <: SourceGeometry
     line::Vec{FT} # not an unit vector!
 end
 
-function generate_point(g::LineSource{FT}, rng) where FT
-    @. g.p + rand(rng, FT)*g.line
+function generate_point(g::LineSource{FT}, rng) where {FT}
+    @. g.p + rand(rng, FT) * g.line
 end
 
-
-struct AreaSource{FT} <: SourceGeometry 
+struct AreaSource{FT} <: SourceGeometry
     tvec::Vector{Triangle{FT}}
     areas::Weights{FT, FT, Vector{FT}}
 end

@@ -13,7 +13,7 @@ struct Ray{FT}
 end
 
 # Construct Ray from point of origin and direction
-function Ray(o::Vec{FT}, dir::Vec{FT}) where FT
-    idir = one(FT)./dir
-    Ray(o, dir, idir, .-o.*idir)
+function Ray(o::Vec{FT}, dir::Vec{FT}) where {FT}
+    idir = one(FT) ./ dir
+    Ray(o, dir, idir, .-o .* idir)
 end

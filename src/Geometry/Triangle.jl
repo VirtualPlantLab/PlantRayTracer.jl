@@ -49,20 +49,20 @@ end
 # Returns intersection_test (T/F), intersection_distance, front (T/F)
 # The front of the triangle is simply the side the normal uVec points to
 # Note: This will fail when the ray hits exactly on the border of the triangle
-function intersect(ray::Ray{FT}, t::Triangle{FT}) where FT
+function intersect(ray::Ray{FT}, t::Triangle{FT}) where {FT}
     # Check if the ray intercepts the plane containing the triangle
     pvec = ray.dir × t.e2
     det = t.e1 ⋅ pvec
-    idet = one(FT)/det
+    idet = one(FT) / det
     # Calculate coordinates of point in barycentric coordinates
     tvec = ray.o - t.p
-    u = idet*(tvec ⋅ pvec)
+    u = idet * (tvec ⋅ pvec)
     (u <= zero(FT) || u >= one(FT)) && (return (false, zero(FT), true))
     qvec = tvec × t.e1
-    v = idet*(ray.dir ⋅ qvec)
+    v = idet * (ray.dir ⋅ qvec)
     (v <= zero(FT) || u + v >= one(FT)) && (return (false, zero(FT), true))
     # Calculate distance to hit
-    d = idet*(t.e2 ⋅ qvec)
+    d = idet * (t.e2 ⋅ qvec)
     (d <= zero(FT)) && (return (false, zero(FT), true))
     return true, d, det < zero(FT)
 end
@@ -73,15 +73,15 @@ function axes(t::Triangle)
 end
 
 # Sample a point from the parallelogram and then apply reflection
-function generate_point(t::Triangle{FT}, rng) where FT 
+function generate_point(t::Triangle{FT}, rng) where {FT}
     u1 = rand(rng, FT)
     u2 = rand(rng, FT)
     if u1 + u2 > FT(1)
         u1 = FT(1) - u1
         u2 = FT(1) - u2
     end
-    @. t.p + t.e1*u1 + t.e2*u2
+    @. t.p + t.e1 * u1 + t.e2 * u2
 end
 
 # Calculate area of a triangle (the norm of cross product is the area of the parallelogram defined by those vectors)
-area(t::Triangle{FT}) where FT = FT(0.5)*norm(t.e1 × t.e2)
+area(t::Triangle{FT}) where {FT} = FT(0.5) * norm(t.e1 × t.e2)

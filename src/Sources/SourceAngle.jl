@@ -34,13 +34,8 @@ struct LambertianSource{FT} <: SourceAngle
 end
 LambertianSource(axes) = LambertianSource(axes...)
 
-function generate_direction(a::LambertianSource{FT}, rng) where FT
-    Φ = FT(2)*FT(π)*rand(rng, FT)
+function generate_direction(a::LambertianSource{FT}, rng) where {FT}
+    Φ = FT(2) * FT(π) * rand(rng, FT)
     θ = acos(sqrt(rand(rng, FT)))
     polar_to_cartesian((e1 = a.x, e2 = a.y, n = a.z), θ, Φ)
 end
-
-
-
-
-
