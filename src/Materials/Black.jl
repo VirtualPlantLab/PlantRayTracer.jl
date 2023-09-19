@@ -14,6 +14,13 @@ end
 
 Create a black material object to store power for `nw` wavelengths. See VPL documentation for
 details.
+
+## Examples
+```jldoctest
+julia> b = Black(1);
+
+julia> b = Black(3);
+```
 """
 Black(nw::Int = 1) = Black(MVector{nw, Float64}(0.0 for _ in 1:nw))
 

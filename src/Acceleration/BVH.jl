@@ -55,9 +55,9 @@ struct AccNode{FT}
 end
 
 """
-    BVH
+    BVH(gbox, nodes, tris, ids)
 
-Construct a Bounding Volume Hierarchy around the triangular meshes to 
+Construct a Bounding Volume Hierarchy around the triangular meshes to
 accelerate the ray tracer. This should be assigned to the argument `acceleration`
 in the `RayTracer` function, in combination with a corresponding `rule`.
 """
@@ -68,6 +68,23 @@ struct BVH{FT} <: Acceleration{FT}
     ids::Vector{Vector{Int}}
 end
 
+"""
+    BVH(tris::Vector{Triangle{FT}}, ids::Vector{Int}, rule) where {FT}
+
+Construct a Bounding Volume Hierarchy given the triangles in a scene, the ids linking each
+triangle to the corresponding material objects and the rule for constructing the BVH.
+
+## Examples
+```jldoctest
+julia> tris = PlantRayTracer.Triangle(PlantGeomPrimitives.Ellipse());
+
+julia> ids  = repeat([1], length(tris));
+
+julia> rule = AvgSplit(1,1);
+
+julia> BVH(tris, ids, rule);
+```
+"""
 # Create a bounding volume hierarchy given the triangles in a scene and a rule
 function BVH(tris::Vector{Triangle{FT}}, ids::Vector{Int}, rule) where {FT}
     # Fit a tight AABB around each triangle and calculate their centers
@@ -101,7 +118,7 @@ function addNode!(bvh::BVH,
         rule)
     # If we decide to split the node
     if children
-        # Ids of the children in the flattened version of the tree. 
+        # Ids of the children in the flattened version of the tree.
         # First child of a node with order i is given by 2i + 1
         nodesid = Tuple(2 * parentid + i for i in 1:2)
         # Add children to nodes
@@ -137,7 +154,7 @@ function splitnode(bvh::BVH{FT}, box, indices, scene, level, rule) where {FT}
     axis, childrenboxes, newindices = split(bvh, box, indices, scene, rule)
     # Special case when the node should not be split according to rule
     axis == 0 && (return false, newindices, childrenboxes, (false, false))
-    # If a split should be made, check whether the children should be leaves 
+    # If a split should be made, check whether the children should be leaves
     # or not based on maximum tree size
     if level + 1 >= rule.maxL
         leaves = (true, true)
@@ -147,7 +164,7 @@ function splitnode(bvh::BVH{FT}, box, indices, scene, level, rule) where {FT}
     return true, newindices, childrenboxes, leaves
 end
 
-# Distribute triangles into the children depending on the position of AABB centers 
+# Distribute triangles into the children depending on the position of AABB centers
 # relative to the split plane
 function distribute(axis, split, indices, scene)
     #@inbounds begin
@@ -172,9 +189,14 @@ end
     AvgSplit(minN, maxL)
 
 Rule to be used in `RayTracer` when `acceleration = BVH`. It will divide each
-node along the longest axis through the mean coordinate value. The rule is 
+node along the longest axis through the mean coordinate value. The rule is
 parameterized by the minimum number of triangles in a leaf node (`minN`) and the
 maximum depth of the tree (`maxL`).
+
+## Examples
+```jldoctest
+julia> rule = AvgSplit(1,5);
+```
 """
 struct AvgSplit
     minN::Int # Minimum number of triangles in a leaf node
@@ -213,9 +235,14 @@ end
 Rule to be used in `RayTracer` when `acceleration = BVH`. It will divide each
 node at the axis and location using the Surface Area Heuristics. To speed up the
 construction, only `K` cuts will be tested per axis. These cuts will correspond
-to the quantiles along each axis. The rule is parameterized by the minimum 
-number of triangles in a leaf node (`minN`) and the maximum depth of the tree 
+to the quantiles along each axis. The rule is parameterized by the minimum
+number of triangles in a leaf node (`minN`) and the maximum depth of the tree
 (`maxL`).
+
+## Examples
+```jldoctest
+julia> rule = SAH{3}(1,5);
+```
 """
 struct SAH{K}
     minN::Int # Minimum number of triangles in a leaf node
@@ -289,7 +316,7 @@ end
 
 # Create acceleration nodes and push them onto the array representation of the tree
 function pushnodes!(bvh::BVH, scene, nodesid, childrenbox, leaves, newindices)
-    #@inbounds 
+    #@inbounds
     for i in 1:2
         if leaves[i]
             push!(bvh.tris, scene.tris[newindices[i]])

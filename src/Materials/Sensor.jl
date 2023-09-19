@@ -15,6 +15,13 @@ end
 Create a sensor material object to store power for `nw` wavelengths. A sensor
 material will let rays pass through without altering the direction or irradiance.
 They will also not count for the total number of ray iterations.
+
+## Examples
+```jldoctest
+julia> s = Sensor(1);
+
+julia> s = Sensor(3);
+```
 """
 Sensor(nw::Int = 1) = Sensor(MVector{nw, Float64}(0.0 for _ in 1:nw)) #Sensor(SArray{Tuple{nw},Threads.Atomic{Float64},1,nw}(Threads.Atomic{Float64}(0.0) for i in 1:nw))
 

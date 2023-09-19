@@ -7,8 +7,13 @@
     tau(vals...)
 
 Generate values of transmisivity to be used in material object. `vals...` is a
-list of one or more comma separted values, corresponding to the different 
+list of one or more comma separted values, corresponding to the different
 wavelengths/wavebands to be simulated in a ray tracer.
+
+## Examples
+```jldoctest
+julia> tau(1.0, 0.0, 2.0);
+```
 """
 tau(vals...) = SVector(vals)
 
@@ -16,8 +21,13 @@ tau(vals...) = SVector(vals)
     rho(vals...)
 
 Generate values of reflectivity to be used in material object. `vals...` is a
-list of one or more comma separted values, corresponding to the different 
+list of one or more comma separted values, corresponding to the different
 wavelengths/wavebands to be simulated in a ray tracer.
+
+## Examples
+```jldoctest
+julia> rho(1.0, 0.0, 2.0);
+```
 """
 rho(vals...) = SVector(vals)
 
@@ -28,7 +38,7 @@ runif(rng, ::Val{n}, ::Type{t}) where {n, t} = NTuple{n, t}(rand(rng, t) for i i
 ################################## Geometry ###################################
 ###############################################################################
 
-# Calculate direction unit vector on Cartesian system axes from the 
+# Calculate direction unit vector on Cartesian system axes from the
 # angles θ and  Φ
 function polar_to_cartesian(axes, θ, Φ)
     e1, e2, n = axes

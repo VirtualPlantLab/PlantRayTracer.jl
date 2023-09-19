@@ -17,9 +17,30 @@ struct Triangle{FT}
 end
 
 """
-    Triangle(p1, p2, p3)
+    Triangle()
+
+Create a ray tracing `Triangle` object with default vertices (unit vectors in each axis).
+
+## Examples
+```jldoctest
+julia> t = PlantRayTracer.Triangle();
+```
+"""
+function Triangle()
+    Triangle(X(), Y(), Z())
+end
+
+"""
+    Triangle(p1::Vec, p2::Vec, p3::Vec)
 
 Create a ray tracing `Triangle` object given the three vertices `p1`, `p2` and `p3`.
+
+## Examples
+```jldoctest
+julia> using PlantGeomPrimitives
+
+julia> t = PlantRayTracer.Triangle(Vec(1.0, 0.0, 1.0), Vec(0.0, 1.0, .0), Vec(1.0, 1.0, 1.0));
+```
 """
 function Triangle(p1::Vec, p2::Vec, p3::Vec)
     e1 = p2 .- p1
@@ -28,18 +49,36 @@ function Triangle(p1::Vec, p2::Vec, p3::Vec)
 end
 
 """
-    Triangle(mesh)
+    Triangle(mesh::Mesh)
 
 Create a vector of ray tracing `Triangle` objects from a `Mesh` object.
+
+## Examples
+```jldoctest
+julia> using PlantGeomPrimitives;
+
+julia> e = Ellipse();
+
+julia> t = PlantRayTracer.Triangle(e);
+```
 """
 function Triangle(mesh::Mesh)
     [Triangle(vertices(mesh)[face]...) for face in faces(mesh)]
 end
 
 """
-    Triangle(mesh)
+    Triangle(scene::Scene)
 
 Create a vector of ray tracing `Triangle` objects from a `Scene` object.
+
+## Examples
+```jldoctest
+julia> using PlantGeomPrimitives;
+
+julia> sc = Scene(mesh = Ellipse());
+
+julia> t = PlantRayTracer.Triangle(sc);
+```
 """
 function Triangle(scene::Scene)
     Triangle(mesh(scene))

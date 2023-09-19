@@ -4,7 +4,7 @@
 """
     Naive
 
-Allow to run the ray tracer without an acceleration structure. This should be 
+Allow to run the ray tracer without an acceleration structure. This should be
 assigned to the argument `acceleration` in the `RayTracer` function.
 """
 struct Naive{FT} <: Acceleration{FT}
@@ -13,7 +13,24 @@ struct Naive{FT} <: Acceleration{FT}
     id::Vector{Int}
 end
 
-# Rule is not actually used but is kept for compatibility with BVH
+"""
+    Naive(tris::Vector{Triangle{FT}}, ids::Vector{Int}, rule) where {FT}
+
+Wrap the scene into a global bounding box (no acceleration), given the triangles in a scene,
+the ids linking each triangle to the corresponding material objects. The argument `rule` is
+left for compatibility with `BVH`, it does not do anything.
+
+## Examples
+```jldoctest
+julia> using PlantGeomPrimitives
+
+julia> tris = PlantRayTracer.Triangle(Ellipse());
+
+julia> ids  = repeat([1], length(tris));
+
+julia> Naive(tris, ids);
+```
+"""
 function Naive(triangles, ids, rule = nothing)
     gbox = AABB(triangles)
     Naive(gbox, triangles, ids)

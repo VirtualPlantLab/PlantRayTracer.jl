@@ -2,15 +2,24 @@
 # DirectionalSource
 
 """
-    DirectionalSource(box::AABB, θ, Φ, radiosity, nrays)
-    DirectionalSource(scene::Scene, θ, Φ, radiosity, nrays)
+    DirectionalSource(box::AABB; θ, Φ, radiosity, nrays)
+    DirectionalSource(scene::Scene; θ, Φ, radiosity, nrays)
 
 Create a Directional source (including geometry and angle components) by providing an axis-aligned
 bounding box (`box`) or an `Scene` object (`scene`) as well as the zenith (`θ`) and azimuth (`Φ`)
-angles, the radiosity of the source and the number of rays to be generated. 
+angles, the radiosity of the source and the number of rays to be generated.
 Directional sources may generate incorrect results in the absence of a grid cloner
 that extendes the scenes. This is because the rays are generated from the upper
 face of the scene's bounding box. See VPL documentation for details on light sources.
+
+## Examples
+```jldoctest
+julia> using PlantGeomPrimitives;
+
+julia> sc = Scene(mesh = Ellipse());
+
+julia> source = DirectionalSource(sc, θ = 0.0, Φ = 0.0, radiosity = 1.0, nrays = 1_000);
+```
 """
 function DirectionalSource(box::AABB; θ, Φ, radiosity, nrays)
     dir_geom = create_directional(box)

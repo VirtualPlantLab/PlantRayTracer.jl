@@ -32,11 +32,22 @@ end
     Source(geom, angle, power::Number, nrays)
     Source(geom, angle, power::Tuple, nrays)
 
-Createn irradiance source given a source geometry, a source angle, the power per ray and
+Create an irradiance source given a source geometry, a source angle, the power per ray and
 the total number of rays to be generated from this source. When simulating more than one
 wavelength simultaneously, a tuple of power values should be given, of the same length as
-in the materials used in the scene. See VPL documentation for details on source geometries 
+in the materials used in the scene. See VPL documentation for details on source geometries
 and source angles.
+
+## Examples
+```jldoctest
+julia> import PlantGeomPrimitives as PG
+
+julia> source_geom = PointSource(PG.O());
+
+julia> source_dir = FixedSource(0.0, 0.0);
+
+julia> Source(source_geom, source_dir, 1.0, 1_000);
+```
 """
 function Source(geom, angle, power::Number, nrays::Integer)
     Source(geom, angle, SVector{1, Float64}(power), nrays)
@@ -49,6 +60,17 @@ end
     get_nw(s::Source)
 
 Retrieve the number of wavelengths that rays from a source will contain.
+
+## Examples
+```jldoctest
+julia> using PlantGeomPrimitives;
+
+julia> sc = Scene(mesh = Ellipse());
+
+julia> source = DirectionalSource(sc, θ = 0.0, Φ = 0.0, radiosity = 1.0, nrays = 1_000);
+
+julia> get_nw(source);
+```
 """
 get_nw(s::Source{G, A, nw}) where {G, A, nw} = nw
 
