@@ -1,11 +1,6 @@
 using PlantRayTracer
 using Documenter
 
-DocMeta.setdocmeta!(PlantRayTracer,
-    :DocTestSetup,
-    :(using PlantRayTracer);
-    recursive = true)
-
 makedocs(;
     doctest = false,
     modules = [PlantRayTracer],
