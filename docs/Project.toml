@@ -1,3 +1,4 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+PlantGeomPrimitives = "7eef3cc5-4580-4ff0-8f6f-933507db6664"
 PlantRayTracer = "78485975-e4aa-407d-b3bb-ded5a4265d05"

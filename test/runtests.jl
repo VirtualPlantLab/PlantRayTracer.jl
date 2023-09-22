@@ -18,3 +18,6 @@ end
 
 # Test individual elements of the ray tracer
 include("elements_raytracer.jl")
+
+# Test ray tracing of scenes
+include("raytracer.jl")

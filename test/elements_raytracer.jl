@@ -8,7 +8,7 @@ import Random
 using StaticArrays
 import ColorTypes: RGB, RGBA
 
-#let
+let
 
 ##### Test Ray, Triangle and AABB #####
 
@@ -358,4 +358,4 @@ mat = RT.Sensor(1)
 mat = RT.Sensor(3)
 @test all(power(mat) .== zeros(3))
 
-#end
+end
