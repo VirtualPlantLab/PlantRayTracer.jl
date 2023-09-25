@@ -17,7 +17,11 @@ doctest(PlantRayTracer)
 end
 
 # Test individual elements of the ray tracer
-include("elements_raytracer.jl")
+@testset "Elements of the ray tracer" begin
+    include("elements_raytracer.jl")
+end
 
 # Test ray tracing of scenes
-include("raytracer.jl")
+@testset "Ray tracing scenes" begin
+    include("raytracer.jl")
+end

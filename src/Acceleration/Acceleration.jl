@@ -30,4 +30,4 @@ include("BVH.jl")
     This allows approximating an infinite canopy with low overhead
 =#
 
-include("cloner.jl")
+include("Cloner.jl")
