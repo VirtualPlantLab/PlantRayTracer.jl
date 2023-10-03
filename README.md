@@ -11,4 +11,19 @@
 This package is a component of the VPL ecosystem. It implements and ray tracer algorithm for
 simulating light interception by plants. This package is a component
 of the [Virtual Plant Lab](http://virtualplantlab.com/). Users should install instead the
-interface package [VPL.jl](https://github.com/VirtualPlantLab/VPL.jl).
+interface package [VirtualPlantLab.jl](https://github.com/VirtualPlantLab/VirtualPlantLab.jl).
+
+# 1. Installation
+
+You can install the latest stable version of PlantRayTracer.jl with the Julia package manager:
+
+```julia
+] add PlantRayTracer
+```
+
+Or the development version directly from here:
+
+```julia
+import Pkg
+Pkg.add(url="https://github.com/VirtualPlantLab/PlantRayTracer.jl", rev = "master")
+```
