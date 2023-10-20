@@ -21,6 +21,11 @@ end
     include("elements_raytracer.jl")
 end
 
+# Test ray tracing of tiles
+@testset "Ray tracing scenes" begin
+    include("raytracer_tiles.jl")
+end
+
 # Test ray tracing of scenes
 @testset "Ray tracing scenes" begin
     include("raytracer.jl")

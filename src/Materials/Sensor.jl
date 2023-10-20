@@ -6,7 +6,7 @@
 all the power associated to the ray
 =#
 struct Sensor{nw} <: Material
-    power::MVector{nw, Float64} #::SArray{Tuple{nw},Threads.Atomic{Float64},1,nw}
+    power::SArray{Tuple{nw}, Atomic{Float64}, 1, nw}
 end
 
 """
@@ -23,7 +23,9 @@ julia> s = Sensor(1);
 julia> s = Sensor(3);
 ```
 """
-Sensor(nw::Int = 1) = Sensor(MVector{nw, Float64}(0.0 for _ in 1:nw)) #Sensor(SArray{Tuple{nw},Threads.Atomic{Float64},1,nw}(Threads.Atomic{Float64}(0.0) for i in 1:nw))
+Sensor(nw::Int = 1) = Sensor(SArray{Tuple{nw}, Threads.Atomic{Float64}, 1, nw}(Threads.Atomic{
+    Float64,
+}(0.0) for i in 1:nw))
 
 ###############################################################################
 ################################## API ########################################
@@ -40,9 +42,9 @@ end
 #=
     Add all the power to the material but do not affect the power of the ray
 =#
-@inbounds function absorb_power!(material::Sensor, power, interaction)
-    for i in eachindex(power)
-        material.power[i] += power[i] #Threads.atomic_add!(material.power[i], power[i])
+function absorb_power!(material::Sensor, power, interaction)
+    @inbounds for i in eachindex(power)
+        atomic_add!(material.power[i], power[i])
     end
     return nothing
 end

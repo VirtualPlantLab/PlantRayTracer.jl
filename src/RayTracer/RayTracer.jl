@@ -232,7 +232,7 @@ function trace!(rt::RayTracer)
     # Run ray tracer across multiple threads
     if rt.settings.parallel
         # Each thread gets a deep copy of materials to avoid data races
-        materials = [deepcopy(rt.materials) for _ in 1:nthreads()]
+        #materials = [deepcopy(rt.materials) for _ in 1:nthreads()]
         # Each thread gets a different pseudo-random number generator which seed depends on the original one
         samplers = [deepcopy(rt.settings.sampler) for _ in 1:Threads.nthreads()]
         for i in 1:Threads.nthreads()
@@ -247,7 +247,8 @@ function trace!(rt::RayTracer)
         nrays_thread = zeros(Int, nthreads())
         @threads for i in 1:nthreads()
             @inbounds nrays_thread[i] = trace_thread!(rt,
-                materials[i],
+                rt.materials,
+                #materials[i],
                 nrays,
                 irays[i],
                 erays[i],
@@ -255,11 +256,11 @@ function trace!(rt::RayTracer)
         end
         nrays_traced = sum(nrays_thread)
         # Copy the power stored in each material back to the original
-        for it in 1:nthreads()
-            for im in 1:length(rt.materials)
-                @inbounds rt.materials[im].power .+= materials[it][im].power
-            end
-        end
+        # for it in 1:nthreads()
+        #     for im in 1:length(rt.materials)
+        #         @inbounds rt.materials[im].power .+= materials[it][im].power
+        #     end
+        # end
         # Run ray tracer in a single multiple thread
     else
         nrays_traced = trace_thread!(rt,

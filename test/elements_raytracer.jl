@@ -291,9 +291,9 @@ let
     mode, coef = RT.choose_outcome(mat, source_power, rng)
     @test coef == [0.3]
     @test mode == :ρ
-    power(mat)[1] = 8.0
+    mat.power[1].value = 8.0
     RT.reset!(mat)
-    @test power(mat)[1] == 0.0
+    @test all(power(mat) .== [0.0])
 
     mat = RT.Lambertian(τ = 0.3, ρ = 0.0)
     @test mat isa RT.Material
@@ -319,8 +319,8 @@ let
     mode, coef = RT.choose_outcome(mat, source_power, rng)
     @test coef == [0.3, 0.3]
     @test mode == :ρ
-    power(mat)[1] = 8.0
-    power(mat)[2] = 2.0
+    mat.power[1].value = 8.0
+    mat.power[2].value = 2.0
     RT.reset!(mat)
     @test all(power(mat) .== zeros(2))
 
@@ -348,13 +348,13 @@ let
 
     # Black material
     mat = RT.Black(1)
-    @test all(power(mat) .== zeros(1))
+    @test all(power(mat) .== 0.0)
     mat = RT.Black(3)
     @test all(power(mat) .== zeros(3))
 
     # Sensor material
     mat = RT.Sensor(1)
-    @test all(power(mat) .== zeros(1))
+    @test all(power(mat) .== 0.0)
     mat = RT.Sensor(3)
     @test all(power(mat) .== zeros(3))
 end
