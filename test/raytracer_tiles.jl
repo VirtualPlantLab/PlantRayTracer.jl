@@ -2,7 +2,7 @@ import PlantGraphs as PG
 import PlantGeomPrimitives as PGP
 import PlantGeomTurtle as PGT
 import PlantRayTracer as PRT
-import GLMakie
+#import GLMakie
 #import PlantViz as PV
 using Test
 import ColorTypes: RGB
