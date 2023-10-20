@@ -5,7 +5,7 @@ using LinearAlgebra
 import Statistics: quantile, mean
 import Base: intersect, length
 import Random
-import Base.Threads: @threads, nthreads
+import Base.Threads: @threads, nthreads, Atomic, atomic_add!
 
 # External dependencies
 import StaticArrays: SVector,

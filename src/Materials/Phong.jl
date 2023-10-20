@@ -5,7 +5,7 @@
   Modified Phong model taken from Lafortune & Willems (1994)
 =#
 struct Phong{nw} <: Material
-    power::MVector{nw, Float64} #::SArray{Tuple{nw},Threads.Atomic{Float64},1,nw}
+    power::SArray{Tuple{nw}, Atomic{Float64}, 1, nw}
     τ::SVector{nw, Float64} # Transmittance
     ρd::SVector{nw, Float64} # Diffuse reflectivity
     ρsmax::SVector{nw, Float64} # Specular reflectivity
@@ -33,13 +33,15 @@ function Phong(; τ = 0.0, ρd = 0.0, ρsmax = 0.0, n = 2)
 end
 
 function Phong(τ::Number, ρd::Number, ρsmax::Number, n::Number)
-    Phong{1}(MVector{1, Float64}(0.0), SVector(τ), SVector(ρd), SVector(ρsmax), n)
+    power = SArray{Tuple{1}, Atomic{Float64}, 1, 1}(Atomic{Float64}(0))
+    Phong{1}(power, SVector(τ), SVector(ρd), SVector(ρsmax), n)
 end
 
 function Phong(τ::Tuple, ρd::Tuple, ρsmax::Tuple, n::Number)
     @assert length(τ)==length(ρd)==length(ρsmax) "All arguments to Phong() must have the same length"
     nw = length(τ)
-    Phong{nw}(MVector{nw, Float64}(0.0 for _ in 1:nw), τ, ρd, ρsmax, n)
+    power = SArray{Tuple{nw}, Atomic{Float64}, 1, nw}(Atomic{Float64}(0) for _ in 1:nw)
+    Phong{nw}(power, τ, ρd, ρsmax, n)
 end
 
 ###############################################################################
@@ -71,7 +73,7 @@ function absorb_power!(material::Phong, power, interaction)
     @inbounds begin
         for i in eachindex(power)
             Δpower = power[i] * (1.0 - interaction.coef[i])
-            material.power[i] += Δpower #Threads.atomic_add!(material.power[i], Δpower)
+            atomic_add!(material.power[i], Δpower)
             power[i] *= interaction.coef[i]
         end
         return nothing
