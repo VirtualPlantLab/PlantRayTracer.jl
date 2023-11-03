@@ -11,39 +11,39 @@ import ColorTypes: RGB
 
 # Modules needed to test ray tracing of graphs
 module sn
-using PlantGraphs
-using PlantRayTracer
-struct E64 <: Node
-    length::Float64
-    mat::Black{1}
-end
-struct E32 <: Node
-    length::Float32
-    mat::Black{1}
-end
-struct E2 <: Node
-    length::Float64
-    mat::Vector{Black{1}}
-end
+   using PlantGraphs
+   using PlantRayTracer
+   struct E64 <: Node
+       length::Float64
+       mat::Black{1}
+   end
+   struct E32 <: Node
+       length::Float32
+       mat::Black{1}
+   end
+   struct E2 <: Node
+       length::Float64
+       mat::Vector{Black{1}}
+   end
 end
 import .sn
 
 module btree
-import PlantGraphs as G
-using PlantRayTracer
-# Meristem
-struct Meristem <: G.Node end
-# Node
-struct Node <: G.Node end
-# Internode
-mutable struct Internode <: G.Node
-    length::Float64
-    mat::Lambertian{1}
-end
-# Graph-level variables
-struct treeparams
-    growth::Float64
-end
+    import PlantGraphs as G
+    using PlantRayTracer
+    # Meristem
+    struct Meristem <: G.Node end
+    # Node
+    struct Node <: G.Node end
+    # Internode
+    mutable struct Internode <: G.Node
+        length::Float64
+        mat::Lambertian{1}
+    end
+    # Graph-level variables
+    struct treeparams
+        growth::Float64
+    end
 end
 import .btree
 
@@ -160,7 +160,7 @@ let
     pow_abs = material[1].power[1].value
     pow_gen = source.power[1] * source.nrays
     @test pow_abs ≈ pow_gen
-    @test pow_abs / area(rect) ≈ radiosity
+    @test pow_abs / area(rect) ≈ radiosity*cos(π/4)
 
     ##### Using sensors #####
 
@@ -171,8 +171,8 @@ let
         r = Rectangle(length = 1.5, width = 1.0)
         rotatey!(r, -π / 2) # To put it in the XY plane
         r
-    end
-                                  for i in 1:3)
+      end
+    for i in 1:3)
     translate!(rect2, Z())
     translate!(rect3, 2.0 * Z())
     rectangles = Mesh([rect1, rect2, rect3])
@@ -214,7 +214,7 @@ let
     pow_abs = [material.power[1].value for material in mats]
     pow_gen = source.power[1] * source.nrays
     @test all(pow_abs .≈ pow_gen)
-    @test all(pow_abs ./ area(rect1) .≈ radiosity)
+    @test all(pow_abs ./ area(rect1) .≈ radiosity .* cos.(π/4))
 
     # render(rectangles)
     # render!(source)
@@ -229,8 +229,7 @@ let
         r = Rectangle(length = 1.0, width = 1.5)
         rotatey!(r, -π / 2) # To put it in the XY plane
         r
-    end
-                                  for i in 1:3)
+    end for i in 1:3)
     translate!(rect2, Z())
     translate!(rect3, 2.0 * Z())
     rectangles = Mesh([rect1, rect2, rect3])
@@ -262,7 +261,7 @@ let
 
     @test nrays_traced > nrays
     RTirrs = [mats[i].power[1].value / area(rect1) for i in 1:3]
-    @test all(RTirrs .< [1.0 for i in 1:3])
+    @test all(RTirrs .< [cos(π / 4) for i in 1:3])
     @test RTirrs[1] < RTirrs[2] < RTirrs[3]
     RTirrs_naive = deepcopy(RTirrs) # for comparison with BVH later
 
@@ -353,7 +352,7 @@ let
 
     @test nrays_traced == 3nrays
     RTirrs = [mats[i].power[1].value / area(rect1) for i in 1:3]
-    @test RTirrs ≈ [1.0 for i in 1:3]
+    @test RTirrs ≈ [cos(π / 4) for i in 1:3]
 
     # Intersection of a rectangle from a directional light source at an angle (Lambertian)
     nrays = 1_000_000
@@ -383,7 +382,7 @@ let
 
     @test nrays_traced > nrays
     RTirrs = [mats[i].power[1].value / area(rect1) for i in 1:3]
-    @test all(RTirrs .< [1.0 for i in 1:3])
+    @test all(RTirrs .< [cos(π / 4) for i in 1:3])
     @test RTirrs[1] < RTirrs[2] < RTirrs[3]
 
     # Should yield the same results as the naive acceleration structure!
