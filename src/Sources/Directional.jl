@@ -23,10 +23,10 @@ julia> source = DirectionalSource(sc, θ = 0.0, Φ = 0.0, radiosity = 1.0, nrays
 """
 function DirectionalSource(box::AABB; θ, Φ, radiosity, nrays)
     dir_geom = create_directional(box)
-    # Radiosity is assumed to be project onto horizontal plane
+    # Radiosity is projected onto horizontal plane as we sample from the top of the bounding box
     # The code below ensures that we get the right irradiance onto the scene
-    power = radiosity * area(dir_geom)# base_area(box) -> from earlier version
-    Source(dir_geom, FixedSource(θ, Φ), power / nrays, nrays)
+    power = radiosity * area(dir_geom) * cos(θ) # base_area(box) -> from earlier version
+    out = Source(dir_geom, FixedSource(θ, Φ), power/nrays, nrays)
 end
 function DirectionalSource(scene::Scene; θ, Φ, radiosity, nrays)
     box = AABB(scene)

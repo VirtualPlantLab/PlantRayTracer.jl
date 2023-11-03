@@ -36,7 +36,7 @@ let
     ##################### Common elements ####################
 
     # Length of unit tile
-    L = 1.0
+    L = 0.5
 
     # Construct the tile with N triangles
     function PGT.feed!(turtle::PGT.Turtle, tile::Tiles.Tile{N, M}, data) where {N, M}
@@ -55,10 +55,10 @@ let
     function ray_trace!(scene,
         settings,
         acceleration = PRT.Naive;
-        radiosity = radiosity,
-        nrays = nrays)
-        source = PRT.DirectionalSource(scene,
-            θ = 0.0,
+        radiosity = 1.0,
+        nrays = 1000, θ = 0.0)
+         source = PRT.DirectionalSource(scene,
+            θ = θ,
             Φ = 0.0,
             radiosity = radiosity,
             nrays = nrays)
@@ -79,8 +79,7 @@ let
     end
 
     # Test results
-    function test_results(pow, irradiance, target = radiosity * 0.7, nt = 1)
-        @test rel(pow, nt * target) < 1e-2
+    function test_results(irradiance, target = radiosity * 0.7)
         @test rel(irradiance, target) < 1e-2
         return nothing
     end
@@ -95,27 +94,51 @@ let
     axiom = PGT.RA(90.0) + Tiles.Tile{N, nw}(L, [PRT.Lambertian(τ = 0.1, ρ = 0.2)])
     graph = PG.Graph(axiom = axiom)
     scene = PGP.Scene(graph)
-    #render_scene(scene)
+    #render(scene)
 
     # Naive + Serial
-    ray_trace!(scene, settings, PRT.Naive, radiosity = radiosity = nrays = nrays)
+    ray_trace!(scene, settings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # Naive + Parallel
-    ray_trace!(scene, psettings, PRT.Naive, radiosity = radiosity = nrays = nrays)
+    ray_trace!(scene, psettings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Serial
-    ray_trace!(scene, settings, PRT.BVH, radiosity = radiosity = nrays = nrays)
+    ray_trace!(scene, settings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Parallel
-    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity = nrays = nrays)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7)
+    test_results(irradiance, sum(radiosity) * 0.7)
+
+    # Source is at an angle
+    θ = π/3
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    pow, irradiance = get_power(graph, N, nw)
+    test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
+
+    # Tile is also at an angle (because of cloner only a fraction is exposed!)
+    N = 1
+    nw = 1
+    radiosity = 1.0
+    nrays = 1_000
+    axiom = PGT.RA(90.0) + PGT.RH(60.0) + Tiles.Tile{N, nw}(L, [PRT.Lambertian(τ = 1e-6, ρ = 1e-6)])
+    graph = PG.Graph(axiom = axiom)
+    scene = PGP.Scene(graph)
+    #render(scene)
+    θ = π/3
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    pow, irradiance = get_power(graph, N, nw)
+    d = 0.5
+    sin_alpha = sin(pi/3)
+    h = d*sin_alpha
+    dp = d - h*h/d
+    test_results(irradiance, sum(radiosity) * dp/d)
 
     ##################### One tile with multiple triangles and single wavelength ####################
     N = 10
@@ -128,24 +151,30 @@ let
     #render_scene(scene)
 
     # Naive + Serial
-    ray_trace!(scene, settings, PRT.Naive)
+    ray_trace!(scene, settings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # Naive + Parallel
-    ray_trace!(scene, psettings, PRT.Naive)
+    ray_trace!(scene, psettings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Serial
-    ray_trace!(scene, settings, PRT.BVH)
+    ray_trace!(scene, settings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Parallel
-    ray_trace!(scene, psettings, PRT.BVH)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7)
+    test_results(irradiance, sum(radiosity) * 0.7)
+
+    # Source is at an angle
+    θ = π/3
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    pow, irradiance = get_power(graph, N, nw)
+    test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
 
     ##################### One tile with multiple triangles and multiple wavelength ####################
     N = 10
@@ -159,24 +188,30 @@ let
     #render_scene(scene)
 
     # Naive + Serial
-    ray_trace!(scene, settings, PRT.Naive)
+    ray_trace!(scene, settings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # Naive + Parallel
-    ray_trace!(scene, psettings, PRT.Naive)
+    ray_trace!(scene, psettings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Serial
-    ray_trace!(scene, settings, PRT.BVH)
+    ray_trace!(scene, settings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Parallel
-    ray_trace!(scene, psettings, PRT.BVH)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7)
+    test_results(irradiance, sum(radiosity) * 0.7)
+
+    # Source is at an angle
+    θ = π/3
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    pow, irradiance = get_power(graph, N, nw)
+    test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
 
     ##################### Many tiles with multiple triangles and single wavelength ####################
     N = 10
@@ -190,24 +225,31 @@ let
     #render_scene(scene)
 
     # Naive + Serial
-    ray_trace!(scene, settings, PRT.Naive)
+    ray_trace!(scene, settings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # Naive + Parallel
-    ray_trace!(scene, psettings, PRT.Naive)
+    ray_trace!(scene, psettings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Serial
-    ray_trace!(scene, settings, PRT.BVH)
+    ray_trace!(scene, settings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Parallel
-    ray_trace!(scene, psettings, PRT.BVH)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
+
+    # Source is at an angle
+    θ = π/3
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    pow, irradiance = get_power(graph, N, nw)
+    test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
+
 
     ##################### Many tiles with multiple triangles and multiple wavelengths ####################
     N = 10
@@ -221,30 +263,37 @@ let
     #render_scene(scene)
 
     # Naive + Serial
-    ray_trace!(scene, settings, PRT.Naive)
+    ray_trace!(scene, settings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # Naive + Parallel
-    ray_trace!(scene, psettings, PRT.Naive)
+    ray_trace!(scene, psettings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Serial
-    ray_trace!(scene, settings, PRT.BVH)
+    ray_trace!(scene, settings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Parallel
-    ray_trace!(scene, psettings, PRT.BVH)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
+
+    # Source is at an angle
+    θ = π/3
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    pow, irradiance = get_power(graph, N, nw)
+    test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
+
 
     ##################### Two graphs - many tiles with multiple triangles and multiple wavelengths ####################
     N = 10
     nw = 2
     radiosity = @SVector [0.5, 0.5]
-    nrays = 500_000
+    nrays = 1_000_000
     make_tile() = Tiles.Tile{N, nw}(L, [PRT.Lambertian(τ = (0.1, 0.1), ρ = (0.2, 0.2))])
     axiom1 = PGT.RA(90.0) + make_tile() + make_tile()
     graph1 = PG.Graph(axiom = axiom)
@@ -254,32 +303,41 @@ let
     #render_scene(scene)
 
     # Naive + Serial
-    ray_trace!(scene, settings, PRT.Naive)
+    ray_trace!(scene, settings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph1, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
     pow, irradiance = get_power(graph2, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # Naive + Parallel
-    ray_trace!(scene, psettings, PRT.Naive)
+    ray_trace!(scene, psettings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph1, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
     pow, irradiance = get_power(graph2, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Serial
-    ray_trace!(scene, settings, PRT.BVH)
+    ray_trace!(scene, settings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph1, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
     pow, irradiance = get_power(graph2, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Parallel
-    ray_trace!(scene, psettings, PRT.BVH)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph1, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
     pow, irradiance = get_power(graph2, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
+
+    # Source is at an angle
+    θ = π/3
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    pow, irradiance = get_power(graph1, N, nw)
+    test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
+    pow, irradiance = get_power(graph2, N, nw)
+    test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
+
 
     ##################### Two graphs - many tiles with multiple triangles and multiple wavelengths - use add! ####################
     N = 10
@@ -298,34 +356,43 @@ let
     #render_scene(scene)
 
     # Naive + Serial
-    ray_trace!(scene, settings, PRT.Naive)
+    ray_trace!(scene, settings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph1, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
     pow = sum(pow.value for pow in mat.power)
     irradiance = pow / PGP.area(scene_extra.mesh)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # Naive + Parallel
-    ray_trace!(scene, psettings, PRT.Naive)
+    ray_trace!(scene, psettings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph1, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
     pow = sum(pow.value for pow in mat.power)
     irradiance = pow / PGP.area(scene_extra.mesh)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Serial
-    ray_trace!(scene, settings, PRT.BVH)
+    ray_trace!(scene, settings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph1, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
     pow = sum(pow.value for pow in mat.power)
     irradiance = pow / PGP.area(scene_extra.mesh)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Parallel
-    ray_trace!(scene, psettings, PRT.BVH)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph1, N, nw)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
     pow = sum(pow.value for pow in mat.power)
     irradiance = pow / PGP.area(scene_extra.mesh)
-    test_results(pow, irradiance, sum(radiosity) * 0.7, 2)
+    test_results(irradiance, sum(radiosity) * 0.7)
+
+    # Source is at an angle
+    θ = π/3
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    pow, irradiance = get_power(graph1, N, nw)
+    test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
+    pow = sum(pow.value for pow in mat.power)
+    irradiance = pow / PGP.area(scene_extra.mesh)
+    test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
 end
