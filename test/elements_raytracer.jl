@@ -291,7 +291,7 @@ let
     mode, coef = RT.choose_outcome(mat, source_power, rng)
     @test coef == [0.3]
     @test mode == :ρ
-    mat.power[1].value = 8.0
+    mat.power[1] = 8.0
     RT.reset!(mat)
     @test all(power(mat) .== [0.0])
 
@@ -319,8 +319,8 @@ let
     mode, coef = RT.choose_outcome(mat, source_power, rng)
     @test coef == [0.3, 0.3]
     @test mode == :ρ
-    mat.power[1].value = 8.0
-    mat.power[2].value = 2.0
+    mat.power[1] = 8.0
+    mat.power[2] = 2.0
     RT.reset!(mat)
     @test all(power(mat) .== zeros(2))
 

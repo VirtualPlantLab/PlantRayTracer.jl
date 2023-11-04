@@ -6,7 +6,7 @@
 of Lambertian and Phong reflectance
 =#
 struct Lambertian{nw} <: Material
-    power::SArray{Tuple{nw}, Atomic{Float64}, 1, nw}
+    power::MVector{nw, Float64}
     τ::SVector{nw, Float64}
     ρ::SVector{nw, Float64}
 end
@@ -31,12 +31,12 @@ end
 
 function Lambertian(τ::Tuple, ρ::Tuple)
     nw = length(τ)
-    power = SArray{Tuple{nw}, Atomic{Float64}, 1, nw}(Atomic{Float64}(0) for _ in 1:nw)
+    power = @MVector zeros(nw)
     Lambertian(power, SVector(τ), SVector(ρ))
 end
 
 function Lambertian(τ::Real, ρ::Real)
-    power = SArray{Tuple{1}, Atomic{Float64}, 1, 1}(Atomic{Float64}(0))
+    power = @MVector zeros(1)
     Lambertian(power, SVector(τ), SVector(ρ))
 end
 
@@ -64,7 +64,7 @@ function absorb_power!(material::Lambertian, power, interaction)
     @inbounds begin
         for i in eachindex(power)
             Δpower = power[i] * (1.0 - interaction.coef[i])
-            atomic_add!(material.power[i], Δpower) #material.power[i] += power[i] * (1.0 - interaction.coef[i]) #
+            @atomic material.power[i] += Δpower #material.power[i] += power[i] * (1.0 - interaction.coef[i]) #
             power[i] *= interaction.coef[i]
         end
         return nothing

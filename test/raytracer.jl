@@ -91,7 +91,7 @@ let
     nrays = trace!(rtobj)
 
     @test nrays == nrays
-    pow_abs = material[1].power[1].value
+    pow_abs = material[1].power[1]
     pow_gen = source.power[1] * source.nrays
     @test pow_abs ≈ pow_gen
 
@@ -113,7 +113,7 @@ let
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
     nrays_traced = trace!(rtobj)
     @test nrays_traced == nrays
-    pow_abs = material[1].power[1].value
+    pow_abs = material[1].power[1]
     pow_gen = source.power[1] * source.nrays
     @test pow_abs ≈ pow_gen
 
@@ -135,7 +135,7 @@ let
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
     nrays_traced = trace!(rtobj)
     @test nrays_traced == nrays
-    pow_abs = material[1].power[1].value
+    pow_abs = material[1].power[1]
     pow_gen = source.power[1] * source.nrays
     @test pow_abs == 0.0
 
@@ -157,7 +157,7 @@ let
     rtobj = RayTracer(scene, [source], settings = settings, acceleration = Naive)
     nrays_traced = trace!(rtobj)
     @test nrays_traced == nrays
-    pow_abs = material[1].power[1].value
+    pow_abs = material[1].power[1]
     pow_gen = source.power[1] * source.nrays
     @test pow_abs ≈ pow_gen
     @test pow_abs / area(rect) ≈ radiosity*cos(π/4)
@@ -191,7 +191,7 @@ let
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
     nrays_traced = trace!(rtobj)
     @test nrays_traced == 3 * nrays
-    pow_abs = [material.power[1].value for material in mats]
+    pow_abs = [material.power[1] for material in mats]
     pow_gen = source.power[1] * source.nrays
     @test all(pow_abs .≈ pow_gen)
     @test all(pow_abs ./ area(rect1) .≈ radiosity)
@@ -211,7 +211,7 @@ let
     nrays_traced = trace!(rtobj)
 
     @test nrays_traced == 3 * nrays
-    pow_abs = [material.power[1].value for material in mats]
+    pow_abs = [material.power[1] for material in mats]
     pow_gen = source.power[1] * source.nrays
     @test all(pow_abs .≈ pow_gen)
     @test all(pow_abs ./ area(rect1) .≈ radiosity .* cos.(π/4))
@@ -244,7 +244,7 @@ let
     nrays_traced = trace!(rtobj)
 
     @test nrays_traced > nrays
-    pow_abs = [material.power[1].value for material in mats]
+    pow_abs = [material.power[1] for material in mats]
     pow_gen = source.power[1] * source.nrays
     @test sum(pow_abs) < pow_gen
     @test pow_abs[1] < pow_abs[2] < pow_abs[3]
@@ -260,7 +260,7 @@ let
     nrays_traced = trace!(rtobj)
 
     @test nrays_traced > nrays
-    RTirrs = [mats[i].power[1].value / area(rect1) for i in 1:3]
+    RTirrs = [mats[i].power[1] / area(rect1) for i in 1:3]
     @test all(RTirrs .< [cos(π / 4) for i in 1:3])
     @test RTirrs[1] < RTirrs[2] < RTirrs[3]
     RTirrs_naive = deepcopy(RTirrs) # for comparison with BVH later
@@ -287,7 +287,7 @@ let
     nrays = trace!(rtobj)
 
     @test nrays == nrays
-    RTirr = mat[1].power[1].value ./ area(rect)
+    RTirr = mat[1].power[1] ./ area(rect)
     @test RTirr ≈ radiosity
 
     # render(rect)
@@ -314,7 +314,7 @@ let
         rule = SAH{1}(2, 5))
     nrays_traced = trace!(rtobj)
     @test nrays_traced == nrays
-    RTirr = mat[1].power[1].value / area(rect)
+    RTirr = mat[1].power[1] / area(rect)
     @test RTirr ≈ radiosity
 
     # Intersection of a rectangle from a directional light source downwards (sensor)
@@ -340,7 +340,7 @@ let
         rule = SAH{1}(2, 5))
     nrays_traced = trace!(rtobj)
     @test nrays_traced == 3nrays
-    RTirrs = [mats[i].power[1].value / area(rect1) for i in 1:3]
+    RTirrs = [mats[i].power[1] / area(rect1) for i in 1:3]
     @test RTirrs ≈ [1.0 for i in 1:3]
 
     # Intersection of a rectangle from a directional light source at an angle (sensor)
@@ -351,7 +351,7 @@ let
     nrays_traced = trace!(rtobj)
 
     @test nrays_traced == 3nrays
-    RTirrs = [mats[i].power[1].value / area(rect1) for i in 1:3]
+    RTirrs = [mats[i].power[1] / area(rect1) for i in 1:3]
     @test RTirrs ≈ [cos(π / 4) for i in 1:3]
 
     # Intersection of a rectangle from a directional light source at an angle (Lambertian)
@@ -381,7 +381,7 @@ let
     nrays_traced = trace!(rtobj)
 
     @test nrays_traced > nrays
-    RTirrs = [mats[i].power[1].value / area(rect1) for i in 1:3]
+    RTirrs = [mats[i].power[1] / area(rect1) for i in 1:3]
     @test all(RTirrs .< [cos(π / 4) for i in 1:3])
     @test RTirrs[1] < RTirrs[2] < RTirrs[3]
 
@@ -424,7 +424,7 @@ let
     function getpower(tree, query)
         powers = Float64[]
         for x in apply(tree, query)
-            push!(powers, x.mat.power[1].value)
+            push!(powers, x.mat.power[1])
         end
         return powers
     end
@@ -477,8 +477,8 @@ let
     settings = RTSettings(nx = 15, ny = 15, dx = 2.0, dy = 1.0, parallel = true)
     rtobj = RayTracer(scene, sources, settings = settings)
     nrays_traced = trace!(rtobj)
-    @test mats[1].power[1].value / power_out[1] ≈ 1.0
-    @test mats[2].power[1].value / power_out[1] ≈ 0.0
+    @test mats[1].power[1] / power_out[1] ≈ 1.0
+    @test mats[2].power[1] / power_out[1] ≈ 0.0
 
     # Simple test of having multiple materials per geometry
     r = Rectangle(length = 2.0, width = 1.0)
@@ -516,7 +516,7 @@ let
     settings = RTSettings(parallel = true)
     rtobj = RayTracer(scene, sources, settings = settings)
     nrays_traced = trace!(rtobj)
-    @test length(filter(x -> x.power[1].value > 0.0, scene.materials)) == 5 # only 4 faces are seen (+ soil)
+    @test length(filter(x -> x.power[1] > 0.0, scene.materials)) == 5 # only 4 faces are seen (+ soil)
     scene = Scene(Koch, message = "render")
     add!(scene, mesh = r, material = Black(1), color = RGB(0.5, 0.5, 0.0))
     # render(scene)
@@ -528,7 +528,7 @@ let
     settings = RTSettings(parallel = true)
     rtobj = RayTracer(scene, sources, settings = settings)
     nrays_traced = trace!(rtobj)
-    @test length(filter(x -> x.power[1].value > 0.0, scene.materials)) == 17 # 8 faces seen (+ soil)
+    @test length(filter(x -> x.power[1] > 0.0, scene.materials)) == 17 # 8 faces seen (+ soil)
     scene = Scene(Koch, message = "render")
     add!(scene, mesh = r, material = Black(1), color = RGB(0.5, 0.5, 0.0))
     # render(scene)

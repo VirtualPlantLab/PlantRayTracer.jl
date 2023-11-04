@@ -4,6 +4,7 @@ authors = ["Alejandro Morales Sierra <alejandro.moralessierra@wur.nl> and contri
 version = "0.0.3"
 
 [deps]
+Atomix = "a9b6321e-bd34-4604-b9c9-b65b8de01458"
 ColorTypes = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
 CoordinateTransformations = "150eb455-5306-5404-9cee-2592286d6298"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -16,6 +17,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Unrolled = "9602ed7d-8fef-5bc8-8597-8f21381861e8"
 
 [compat]
+Atomix = "0.1.0"
 ColorTypes = "0.11.4"
 CoordinateTransformations = "0.6.3"
 PlantGeomPrimitives = "0.0.2"

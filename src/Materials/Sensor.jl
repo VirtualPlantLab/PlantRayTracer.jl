@@ -6,7 +6,7 @@
 all the power associated to the ray
 =#
 struct Sensor{nw} <: Material
-    power::SArray{Tuple{nw}, Atomic{Float64}, 1, nw}
+    power::MVector{nw, Float64}
 end
 
 """
@@ -23,9 +23,7 @@ julia> s = Sensor(1);
 julia> s = Sensor(3);
 ```
 """
-Sensor(nw::Int = 1) = Sensor(SArray{Tuple{nw}, Threads.Atomic{Float64}, 1, nw}(Threads.Atomic{
-    Float64,
-}(0.0) for i in 1:nw))
+Sensor(nw::Int = 1) = Sensor(@MVector zeros(nw))
 
 ###############################################################################
 ################################## API ########################################
@@ -44,7 +42,7 @@ end
 =#
 function absorb_power!(material::Sensor, power, interaction)
     @inbounds for i in eachindex(power)
-        atomic_add!(material.power[i], power[i])
+        @atomic material.power[i] += power[i]
     end
     return nothing
 end

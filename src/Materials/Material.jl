@@ -26,7 +26,7 @@ Reset the power stored inside a material back to zero
 ```jldoctest
 julia> l = Lambertian(τ = 0.1, ρ = 0.2);
 
-julia> l.power[1].value = 10.0;
+julia> l.power[1] = 10.0;
 
 julia> reset!(l);
 
@@ -34,9 +34,7 @@ julia> l;
 ```
 """
 function reset!(material::Material)
-    for i in eachindex(material.power)
-        @inbounds material.power[i].value = 0.0
-    end
+    material.power .= 0.0
     return nothing
 end
 function reset!(materials::Vector{<:Material})
@@ -58,7 +56,5 @@ julia> power(l);
 ```
 """
 function power(mat::Material)
-    @inbounds nw = typeof(mat).parameters[1]
-    @inbounds typ = eltype(mat.power.data).parameters[1]
-    SVector{nw, typ}(pow.value for pow in mat.power)
+    mat.power
 end

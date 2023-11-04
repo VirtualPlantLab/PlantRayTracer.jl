@@ -24,7 +24,7 @@ let
     # Power and absorbed radiance are extracted with a query
     function get_power(graph, N, M)
         tiles = PG.apply(graph, PG.Query(Tiles.Tile{N, M}))
-        power = sum(sum(sum(pow.value for pow in mat.power) for mat in tile.mat)
+        power = sum(sum(sum(mat.power) for mat in tile.mat)
                     for tile in tiles)
         area = length(tiles) * tiles[1].length^2
         return power, power ./ area
@@ -359,7 +359,7 @@ let
     ray_trace!(scene, settings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph1, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7)
-    pow = sum(pow.value for pow in mat.power)
+    pow = sum(mat.power)
     irradiance = pow / PGP.area(scene_extra.mesh)
     test_results(irradiance, sum(radiosity) * 0.7)
 
@@ -367,7 +367,7 @@ let
     ray_trace!(scene, psettings, PRT.Naive, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph1, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7)
-    pow = sum(pow.value for pow in mat.power)
+    pow = sum(mat.power)
     irradiance = pow / PGP.area(scene_extra.mesh)
     test_results(irradiance, sum(radiosity) * 0.7)
 
@@ -375,7 +375,7 @@ let
     ray_trace!(scene, settings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph1, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7)
-    pow = sum(pow.value for pow in mat.power)
+    pow = sum(mat.power)
     irradiance = pow / PGP.area(scene_extra.mesh)
     test_results(irradiance, sum(radiosity) * 0.7)
 
@@ -383,7 +383,7 @@ let
     ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays)
     pow, irradiance = get_power(graph1, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7)
-    pow = sum(pow.value for pow in mat.power)
+    pow = sum(mat.power)
     irradiance = pow / PGP.area(scene_extra.mesh)
     test_results(irradiance, sum(radiosity) * 0.7)
 
@@ -392,7 +392,7 @@ let
     ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity*cos(θ), nrays = nrays, θ = θ)
     pow, irradiance = get_power(graph1, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
-    pow = sum(pow.value for pow in mat.power)
+    pow = sum(mat.power)
     irradiance = pow / PGP.area(scene_extra.mesh)
     test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
 end

@@ -6,7 +6,7 @@
 all the power associated to the ray
 =#
 struct Black{nw} <: Material
-    power::SArray{Tuple{nw}, Threads.Atomic{Float64}, 1, nw}
+    power::MVector{nw, Float64}
 end
 
 """
@@ -22,8 +22,7 @@ julia> b = Black(1);
 julia> b = Black(3);
 ```
 """
-Black(nw::Int = 1) = Black(SArray{Tuple{nw}, Atomic{Float64}, 1, nw}(Atomic{Float64}(0)
-                                                                     for _ in 1:nw))
+Black(nw::Int = 1) = Black(@MVector zeros(nw))
 
 ###############################################################################
 ################################## API ########################################
@@ -41,7 +40,7 @@ end
 =#
 function absorb_power!(material::Black, power, interaction)
     @inbounds for i in eachindex(power)
-        atomic_add!(material.power[i], power[i])
+        @atomic material.power[i] += power[i]
     end
     power .= 0.0
     return nothing
