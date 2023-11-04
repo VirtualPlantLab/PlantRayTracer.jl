@@ -151,7 +151,7 @@ let
     source = DirectionalSource(gbox,
         θ = π / 4,
         Φ = 0.0,
-        radiosity = radiosity,
+        radiosity = radiosity*cos(π / 4),
         nrays = nrays)
     settings = RTSettings(pkill = 1.0, maxiter = 1, nx = 3, ny = 3, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, [source], settings = settings, acceleration = Naive)
@@ -204,7 +204,7 @@ let
     source = DirectionalSource(gbox,
         θ = π / 4,
         Φ = 0.0,
-        radiosity = radiosity,
+        radiosity = radiosity*cos(π / 4),
         nrays = nrays)
     settings = RTSettings(pkill = 1.0, maxiter = 3, nx = 2, ny = 2, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
@@ -253,7 +253,7 @@ let
     source = DirectionalSource(gbox,
         θ = π / 4,
         Φ = 0.0,
-        radiosity = radiosity,
+        radiosity = radiosity*cos(π / 4),
         nrays = nrays)
     settings = RTSettings(pkill = 0.9, maxiter = 4, nx = 2, ny = 2, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
@@ -344,7 +344,7 @@ let
     @test RTirrs ≈ [1.0 for i in 1:3]
 
     # Intersection of a rectangle from a directional light source at an angle (sensor)
-    source = DirectionalSource(gbox, θ = π / 4, Φ = 0.0, radiosity = 1.0, nrays = nrays)
+    source = DirectionalSource(gbox, θ = π / 4, Φ = 0.0, radiosity = cos(π / 4), nrays = nrays)
     settings = RTSettings(pkill = 1.0, maxiter = 3, nx = 2, ny = 2, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, [source], settings = settings, acceleration = BVH,
         rule = SAH{1}(2, 5))
@@ -373,7 +373,7 @@ let
     source = DirectionalSource(gbox,
         θ = π / 4,
         Φ = 0.0,
-        radiosity = radiosity,
+        radiosity = radiosity*cos(π / 4),
         nrays = nrays)
     settings = RTSettings(pkill = 0.9, maxiter = 4, nx = 4, ny = 4, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, [source], settings = settings, acceleration = BVH,
@@ -434,7 +434,7 @@ let
     # Ray trace the tree with a single directional light source
     nrays = 1_000_000
     scene = Scene(newtree)
-    source = DirectionalSource(scene, θ = π / 4, Φ = 0.0, radiosity = 1.0, nrays = nrays)
+    source = DirectionalSource(scene, θ = π / 4, Φ = 0.0, radiosity = cos(π / 4), nrays = nrays)
     # Tracing with BVH acceleration structure
     settings = RTSettings(pkill = 0.9, maxiter = 4, nx = 5, ny = 5, dx = 1.0,
         dy = 1.0, parallel = true)
@@ -469,7 +469,7 @@ let
     sources = DirectionalSource(scene,
         θ = π / 2 * 0.99,
         Φ = 0.0,
-        radiosity = 1.0,
+        radiosity = cos(π / 2 * 0.99),
         nrays = nrays)
     power_out = sources.power * sources.nrays
     #render(Mesh([r,r2]))
@@ -524,7 +524,7 @@ let
 
     scene = Scene(Koch, message = "raytracer")
     add!(scene, mesh = r, material = Black(1), color = RGB(0.5, 0.5, 0.0))
-    sources = DirectionalSource(scene, θ = π / 4, Φ = π / 2, radiosity = 1.0, nrays = nrays)
+    sources = DirectionalSource(scene, θ = π / 4, Φ = π / 2, radiosity = cos(π / 4), nrays = nrays)
     settings = RTSettings(parallel = true)
     rtobj = RayTracer(scene, sources, settings = settings)
     nrays_traced = trace!(rtobj)

@@ -118,7 +118,7 @@ let
 
     # Source is at an angle
     θ = π/3
-    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity*cos(θ), nrays = nrays, θ = θ)
     pow, irradiance = get_power(graph, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
 
@@ -132,7 +132,7 @@ let
     scene = PGP.Scene(graph)
     #render(scene)
     θ = π/3
-    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity*cos(θ), nrays = nrays, θ = θ)
     pow, irradiance = get_power(graph, N, nw)
     d = 0.5
     sin_alpha = sin(pi/3)
@@ -172,7 +172,7 @@ let
 
     # Source is at an angle
     θ = π/3
-    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity*cos(θ), nrays = nrays, θ = θ)
     pow, irradiance = get_power(graph, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
 
@@ -209,7 +209,7 @@ let
 
     # Source is at an angle
     θ = π/3
-    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity*cos(θ), nrays = nrays, θ = θ)
     pow, irradiance = get_power(graph, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
 
@@ -246,7 +246,7 @@ let
 
     # Source is at an angle
     θ = π/3
-    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity*cos(θ), nrays = nrays, θ = θ)
     pow, irradiance = get_power(graph, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
 
@@ -284,7 +284,7 @@ let
 
     # Source is at an angle
     θ = π/3
-    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity*cos(θ), nrays = nrays, θ = θ)
     pow, irradiance = get_power(graph, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
 
@@ -332,7 +332,7 @@ let
 
     # Source is at an angle
     θ = π/3
-    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity*cos(θ), nrays = nrays, θ = θ)
     pow, irradiance = get_power(graph1, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
     pow, irradiance = get_power(graph2, N, nw)
@@ -389,7 +389,7 @@ let
 
     # Source is at an angle
     θ = π/3
-    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity, nrays = nrays, θ = θ)
+    ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity*cos(θ), nrays = nrays, θ = θ)
     pow, irradiance = get_power(graph1, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
     pow = sum(pow.value for pow in mat.power)

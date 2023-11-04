@@ -7,9 +7,9 @@
 
 Create a Directional source (including geometry and angle components) by providing an axis-aligned
 bounding box (`box`) or an `Scene` object (`scene`) as well as the zenith (`θ`) and azimuth (`Φ`)
-angles, the radiosity of the source and the number of rays to be generated.
-Directional sources may generate incorrect results in the absence of a grid cloner
-that extendes the scenes. This is because the rays are generated from the upper
+angles, the radiosity of the source projected on the horizontal plane and the number of
+rays to be generated. Directional sources may generate incorrect results in the absence of
+a grid cloner that extendes the scenes. This is because the rays are generated from the upper
 face of the scene's bounding box. See VPL documentation for details on light sources.
 
 ## Examples
@@ -25,7 +25,7 @@ function DirectionalSource(box::AABB; θ, Φ, radiosity, nrays)
     dir_geom = create_directional(box)
     # Radiosity is projected onto horizontal plane as we sample from the top of the bounding box
     # The code below ensures that we get the right irradiance onto the scene
-    power = radiosity * area(dir_geom) * cos(θ) # base_area(box) -> from earlier version
+    power = radiosity * area(dir_geom)
     out = Source(dir_geom, FixedSource(θ, Φ), power/nrays, nrays)
 end
 function DirectionalSource(scene::Scene; θ, Φ, radiosity, nrays)
