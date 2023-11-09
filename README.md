@@ -1,7 +1,7 @@
 # PlantRayTracer
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://VirtualPlantLab.github.io/PlantRayTracer.jl/stable/)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://VirtualPlantLab.github.io/PlantRayTracer.jl/dev/)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://virtualplantlab.com/stable/api/raytracer/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://virtualplantlab.com/dev/api/raytracer/)
 [![CI](https://github.com/VirtualPlantLab/PlantRayTracer.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/VirtualPlantLab/PlantRayTracer.jl/actions/workflows/CI.yml)
 [![Coverage](https://codecov.io/gh/VirtualPlantLab/PlantRayTracer.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/VirtualPlantLab/PlantRayTracer.jl)
 [![SciML Code Style](https://img.shields.io/static/v1?label=code%20style&message=SciML&color=9558b2&labelColor=389826)](https://github.com/SciML/SciMLStyle)
