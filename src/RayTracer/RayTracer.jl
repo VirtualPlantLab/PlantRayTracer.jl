@@ -11,7 +11,8 @@
 
 Settings for the ray tracer: `parallel` indicates if the raytracer will run on a single core or make use of
 multiple cores in the machine based on Julia's multithreading support. `pkill` is the probably that a ray is
-terminated by the Russian roulette after it has been scattered a `maxiter` number of times. `sampler` is the
+terminated by the Russian roulette after it has been scattered a `maxiter` number of times (this excludes
+interactions with materials of type `Sensor`). `sampler` is the
 pseudo-random number generator to be used by the ray tracer. `nx` and `ny` are the number of times the scene
 will be clone by the grid cloner in each direction along the x and y axis (e.g., setting `nx = 1` and `ny = 1`
 will generate a grid of 3 x 3 clones of the original scene), whereas `dx` and `dy` will be distance at which
@@ -208,7 +209,9 @@ end
     trace!(rt)
 
 Run the ray tracing simulations. This function will overwrite the `power` component of any material object
-that is included in the scene. It returns the total number of rays being traced (primary and secondary).
+that is included in the scene. It returns the total number of rays being traced (primary and secondary) without
+including interactions with `Sensor` objects (first value returned) or including interactions with `Sensor`
+objects (second value returned).
 See VPL documentation for more details on the ray tracer.
 
 ## Examples
