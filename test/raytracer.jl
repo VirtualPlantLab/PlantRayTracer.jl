@@ -187,10 +187,10 @@ let
         nrays = nrays)
 
     # Need to make sure maxiter > 1 or it will stop after the first sensor
-    settings = RTSettings(pkill = 1.0, maxiter = 3, nx = 1, ny = 1, dx = 1.0, dy = 1.0)
+    settings = RTSettings(pkill = 1.0, maxiter = 2, nx = 1, ny = 1, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
     nrays_traced = trace!(rtobj)
-    @test nrays_traced == 3 * nrays
+    @test nrays_traced == nrays
     pow_abs = [material.power[1] for material in mats]
     pow_gen = source.power[1] * source.nrays
     @test all(pow_abs .≈ pow_gen)
@@ -210,7 +210,7 @@ let
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
     nrays_traced = trace!(rtobj)
 
-    @test nrays_traced == 3 * nrays
+    @test nrays_traced == nrays
     pow_abs = [material.power[1] for material in mats]
     pow_gen = source.power[1] * source.nrays
     @test all(pow_abs .≈ pow_gen)
@@ -339,7 +339,7 @@ let
     rtobj = RayTracer(scene, [source], settings = settings, acceleration = BVH,
         rule = SAH{1}(2, 5))
     nrays_traced = trace!(rtobj)
-    @test nrays_traced == 3nrays
+    @test nrays_traced == nrays
     RTirrs = [mats[i].power[1] / area(rect1) for i in 1:3]
     @test RTirrs ≈ [1.0 for i in 1:3]
 
@@ -350,7 +350,7 @@ let
         rule = SAH{1}(2, 5))
     nrays_traced = trace!(rtobj)
 
-    @test nrays_traced == 3nrays
+    @test nrays_traced == nrays
     RTirrs = [mats[i].power[1] / area(rect1) for i in 1:3]
     @test RTirrs ≈ [cos(π / 4) for i in 1:3]
 

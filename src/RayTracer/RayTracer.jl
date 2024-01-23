@@ -244,9 +244,10 @@ function trace!(rt::RayTracer)
         erays = collect(1:nthreads()) .* Δrays
         erays[end] = total_rays
         # Loop over threads while updating materials and collecting total number of rays traced
-        nrays_thread = zeros(Int, nthreads())
+        net_rays_thread = zeros(Int, nthreads())
+        total_rays_thread = zeros(Int, nthreads())
         @threads for i in 1:nthreads()
-            @inbounds nrays_thread[i] = trace_thread!(rt,
+            @inbounds net_rays_thread[i], total_rays_thread[i]  = trace_thread!(rt,
                 rt.materials,
                 #materials[i],
                 nrays,
@@ -254,7 +255,8 @@ function trace!(rt::RayTracer)
                 erays[i],
                 samplers[i])
         end
-        nrays_traced = sum(nrays_thread)
+        net_rays = sum(net_rays_thread)
+        total_rays = sum(total_rays_thread)
         # Copy the power stored in each material back to the original
         # for it in 1:nthreads()
         #     for im in 1:length(rt.materials)
@@ -263,14 +265,14 @@ function trace!(rt::RayTracer)
         # end
         # Run ray tracer in a single multiple thread
     else
-        nrays_traced = trace_thread!(rt,
+        net_rays, total_rays = trace_thread!(rt,
             rt.materials,
             nrays,
             1,
             total_rays,
             rt.settings.sampler)
     end
-    return nrays_traced
+    return net_rays, total_rays
 end
 
 # Trace a subset of the rays on a given PC thread
@@ -280,7 +282,8 @@ function trace_thread!(rt, materials, nrays, i_ray, e_ray, rng)
     # Number of wavelengths
     nw = get_nw(rt)
     # Keep track of all the rays being traced (including secondary)
-    nrays_traced = 0
+    net_rays_traced = 0
+    total_rays_traced = 0
     # Setup nodestack and power payload and trace all primary rays
     nodestack = Int[]
     tnodestack = Int[]
@@ -289,7 +292,7 @@ function trace_thread!(rt, materials, nrays, i_ray, e_ray, rng)
     power = MVector{nw, Float64}(Tuple(0.0 for _ in 1:nw))
     for i in i_ray:e_ray
         r = generate_ray!(rt.sources, nrays, i, power, rng)
-        nrays_traced += trace!(r,
+        temp = trace!(r,
             rt,
             materials,
             tnodestack,
@@ -298,8 +301,10 @@ function trace_thread!(rt, materials, nrays, i_ray, e_ray, rng)
             dstack,
             power,
             rng)
+        net_rays_traced += temp[1]
+        total_rays_traced += temp[2]
     end
-    return nrays_traced
+    return net_rays_traced, total_rays_traced
 end
 
 # Trace a ray through a scene with Russian roulette
@@ -308,6 +313,7 @@ function trace!(r::Ray{FT}, rt::RayTracer, materials, tnodestack::Vector{Int},
     nodestack::Vector{Int}, dstack::Vector{FT}, power, rng) where {FT}
     # Recursive Monte Carlo ray tracing with Russian roulette criterion
     iteration = 1
+    nrays_traced = 1
     while true
         # Check intersection against scene
         hit, intersection, disp = intersect(r,
@@ -317,20 +323,21 @@ function trace!(r::Ray{FT}, rt::RayTracer, materials, tnodestack::Vector{Int},
             tdstack,
             nodestack,
             dstack)
-        !hit && (return iteration)#(@show loops; return iteration)
+        !hit && (return (iteration, nrays_traced))#(@show loops; return iteration)
         material = materials[intersection.id]
         # Interaction with surface material
         interaction = calculate_interaction(material, power, r, intersection, rng)
         absorb_power!(material, power, interaction)
         # Russian roulette
-        roulette!(power, rt.settings, iteration, rng) && (return iteration)#(@show loops; return iteration)
+        roulette!(power, rt.settings, iteration, rng) && (return (iteration, nrays_traced))#(@show loops; return iteration)
         # Generate new ray
         r = generate_ray(material, r, disp, intersection, interaction, rng)
         # Increase iteration counter (unless it is a sensor-like material)
-        # TODO: if sensors do not increase iteration counter the ray tracer seems to "get stuck" in some cases
-        #if interaction.mode != :sensor
-        iteration += 1
-        #end
+        if interaction.mode != :sensor
+            iteration += 1
+        end
+        # Do keep track of all the rays tracer (because of sensors)
+        nrays_traced += 1
     end
-    return iteration
+    return iteration, nrays_traced
 end

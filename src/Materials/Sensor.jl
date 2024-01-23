@@ -56,5 +56,5 @@ function generate_ray(material::Sensor,
     intersection,
     interaction,
     rng) where {FT}
-    Ray(intersection.pint .+ ray.dir .* eps(FT) .* FT(2), ray.dir, ray.idir, ray.extra)
+    Ray(intersection.pint .+ ray.dir .* sqrt.(eps.(FT)), ray.dir, ray.idir, ray.extra)
 end
