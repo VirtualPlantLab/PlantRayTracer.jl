@@ -88,7 +88,7 @@ let
     source = DirectionalSource(gbox, θ = 0.0, Φ = 0.0, radiosity = radiosity, nrays = nrays)
     settings = RTSettings(pkill = 1.0, maxiter = 1)
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
-    nrays = trace!(rtobj)
+    nrays, _ = trace!(rtobj)
 
     @test nrays == nrays
     pow_abs = material[1].power[1]
@@ -111,7 +111,7 @@ let
     source = DirectionalSource(gbox, θ = 0.0, Φ = 0.0, radiosity = radiosity, nrays = nrays)
     settings = RTSettings(pkill = 1.0, maxiter = 1, nx = 3, ny = 3)
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
     @test nrays_traced == nrays
     pow_abs = material[1].power[1]
     pow_gen = source.power[1] * source.nrays
@@ -133,7 +133,7 @@ let
         nrays = nrays)
     settings = RTSettings(pkill = 1.0, maxiter = 1, nx = 3, ny = 3, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
     @test nrays_traced == nrays
     pow_abs = material[1].power[1]
     pow_gen = source.power[1] * source.nrays
@@ -155,7 +155,7 @@ let
         nrays = nrays)
     settings = RTSettings(pkill = 1.0, maxiter = 1, nx = 3, ny = 3, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, [source], settings = settings, acceleration = Naive)
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
     @test nrays_traced == nrays
     pow_abs = material[1].power[1]
     pow_gen = source.power[1] * source.nrays
@@ -189,7 +189,7 @@ let
     # Need to make sure maxiter > 1 or it will stop after the first sensor
     settings = RTSettings(pkill = 1.0, maxiter = 2, nx = 1, ny = 1, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
     @test nrays_traced == nrays
     pow_abs = [material.power[1] for material in mats]
     pow_gen = source.power[1] * source.nrays
@@ -208,7 +208,7 @@ let
         nrays = nrays)
     settings = RTSettings(pkill = 1.0, maxiter = 3, nx = 2, ny = 2, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
 
     @test nrays_traced == nrays
     pow_abs = [material.power[1] for material in mats]
@@ -241,7 +241,7 @@ let
     # Need to make sure maxiter > 1 or it will stop after the first sensor
     settings = RTSettings(pkill = 0.9, maxiter = 4, nx = 1, ny = 1, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
 
     @test nrays_traced > nrays
     pow_abs = [material.power[1] for material in mats]
@@ -257,7 +257,7 @@ let
         nrays = nrays)
     settings = RTSettings(pkill = 0.9, maxiter = 4, nx = 2, ny = 2, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
 
     @test nrays_traced > nrays
     RTirrs = [mats[i].power[1] / area(rect1) for i in 1:3]
@@ -284,7 +284,7 @@ let
     settings = RTSettings(pkill = 1.0, maxiter = 1)
     rtobj = RayTracer(scene, source, settings = settings, acceleration = BVH,
         rule = SAH{1}(2, 5))
-    nrays = trace!(rtobj)
+    nrays, _ = trace!(rtobj)
 
     @test nrays == nrays
     RTirr = mat[1].power[1] ./ area(rect)
@@ -312,7 +312,7 @@ let
     settings = RTSettings(pkill = 1.0, maxiter = 1, nx = 3, ny = 3, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, [source], settings = settings, acceleration = BVH,
         rule = SAH{1}(2, 5))
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
     @test nrays_traced == nrays
     RTirr = mat[1].power[1] / area(rect)
     @test RTirr ≈ radiosity
@@ -338,7 +338,7 @@ let
     settings = RTSettings(pkill = 1.0, maxiter = 3, nx = 1, ny = 1, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, [source], settings = settings, acceleration = BVH,
         rule = SAH{1}(2, 5))
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
     @test nrays_traced == nrays
     RTirrs = [mats[i].power[1] / area(rect1) for i in 1:3]
     @test RTirrs ≈ [1.0 for i in 1:3]
@@ -348,7 +348,7 @@ let
     settings = RTSettings(pkill = 1.0, maxiter = 3, nx = 2, ny = 2, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, [source], settings = settings, acceleration = BVH,
         rule = SAH{1}(2, 5))
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
 
     @test nrays_traced == nrays
     RTirrs = [mats[i].power[1] / area(rect1) for i in 1:3]
@@ -378,7 +378,7 @@ let
     settings = RTSettings(pkill = 0.9, maxiter = 4, nx = 4, ny = 4, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(scene, [source], settings = settings, acceleration = BVH,
         rule = SAH{1}(2, 5))
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
 
     @test nrays_traced > nrays
     RTirrs = [mats[i].power[1] / area(rect1) for i in 1:3]
@@ -440,13 +440,13 @@ let
         dy = 1.0, parallel = true)
     rtobj = RayTracer(scene, source, settings = settings, acceleration = BVH,
         rule = SAH{6}(5, 10))
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
     powers_bvh = getpower(newtree, getInternode)
     # Tracing with Naive acceleration structure
     settings = RTSettings(pkill = 0.9, maxiter = 4, nx = 5, ny = 5, dx = 1.0,
         dy = 1.0, parallel = true)
     rtobj = RayTracer(scene, [source], settings = settings, acceleration = Naive)
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
     powers_naive = getpower(newtree, getInternode)
 
     # For low number of rays the results are the same for the Naive and BVH
@@ -476,7 +476,7 @@ let
     #render!(sources)
     settings = RTSettings(nx = 15, ny = 15, dx = 2.0, dy = 1.0, parallel = true)
     rtobj = RayTracer(scene, sources, settings = settings)
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
     @test mats[1].power[1] / power_out[1] ≈ 1.0
     @test mats[2].power[1] / power_out[1] ≈ 0.0
 
@@ -515,7 +515,7 @@ let
     sources = DirectionalSource(scene, θ = π / 4, Φ = 0.0, radiosity = 1.0, nrays = nrays)
     settings = RTSettings(parallel = true)
     rtobj = RayTracer(scene, sources, settings = settings)
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
     @test length(filter(x -> x.power[1] > 0.0, scene.materials)) == 5 # only 4 faces are seen (+ soil)
     scene = Scene(Koch, message = "render")
     add!(scene, mesh = r, material = Black(1), color = RGB(0.5, 0.5, 0.0))
@@ -527,7 +527,7 @@ let
     sources = DirectionalSource(scene, θ = π / 4, Φ = π / 2, radiosity = cos(π / 4), nrays = nrays)
     settings = RTSettings(parallel = true)
     rtobj = RayTracer(scene, sources, settings = settings)
-    nrays_traced = trace!(rtobj)
+    nrays_traced, _ = trace!(rtobj)
     @test length(filter(x -> x.power[1] > 0.0, scene.materials)) == 17 # 8 faces seen (+ soil)
     scene = Scene(Koch, message = "render")
     add!(scene, mesh = r, material = Black(1), color = RGB(0.5, 0.5, 0.0))
