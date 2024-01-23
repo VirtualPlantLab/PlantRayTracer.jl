@@ -38,6 +38,10 @@ function Phong(τ::Number, ρd::Number, ρsmax::Number, n::Number)
 end
 
 function Phong(τ::Tuple, ρd::Tuple, ρsmax::Tuple, n::Number)
+    Phong(SVector(τ), SVector(ρd), SVector(ρsmax), n)
+end
+
+function Phong(τ::SVector, ρd::SVector, ρsmax::SVector, n::Number)
     @assert length(τ)==length(ρd)==length(ρsmax) "All arguments to Phong() must have the same length"
     nw = length(τ)
     power = @MVector zeros(nw)
@@ -107,7 +111,7 @@ end
 # and therefore the final outcome will be τ or ρd
 function calc_specular(m::Phong{nw}, axes, rng, idir, Φ) where {nw}
     ρ0 = SVector{nw, Float64}(0.0 for _ in 1:nw)
-    if m.ρsmax > 0.0
+    if any(m.ρsmax .> 0.0)
         # Sample an angle from the Phong lobe
         θ = sample_phong(m, axes, rng, idir, Φ)
         # Estimator of specular reflectance (Lafortune & Willems, 1994)
@@ -126,7 +130,8 @@ function choose_outcome(m::Phong, ρs, power, rng)
     # Calculate probabilities of τ, ρd, ρs
     sτ = sum(m.τ .* power)
     sρd = sum(m.ρd .* power)
-    den = sτ + sρd + ρs
+    sρs = sum(ρs .* power)
+    den = sτ + sρd + sρs
     pτ = sτ / den
     pρd = sρd / den
     pρs = 1 - pτ - pρd
@@ -138,7 +143,7 @@ function choose_outcome(m::Phong, ρs, power, rng)
     elseif roll < pτ + pρd
         return (mode = :ρd, coef = m.ρd ./ pρd)
     else
-        return (mode = :ρs, coef = m.ρs ./ pρs)
+        return (mode = :ρs, coef = sρs ./ pρs)
     end
 end
 

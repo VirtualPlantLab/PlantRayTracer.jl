@@ -2,6 +2,7 @@ using PlantRayTracer
 using Test
 using Documenter
 import Aqua
+import ColorTypes: RGB, RGBA
 
 # Test examples on documentation (jldoctest blocks)
 DocMeta.setdocmeta!(PlantRayTracer,

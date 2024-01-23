@@ -30,6 +30,10 @@ function Lambertian(; τ = 0.0, ρ = 0.0)
 end
 
 function Lambertian(τ::Tuple, ρ::Tuple)
+    Lambertian(SVector(τ), SVector(ρ))
+end
+
+function Lambertian(τ::SVector, ρ::SVector)
     nw = length(τ)
     power = @MVector zeros(nw)
     Lambertian(power, SVector(τ), SVector(ρ))
