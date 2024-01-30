@@ -357,4 +357,12 @@ let
     @test all(power(mat) .== 0.0)
     mat = RT.Sensor(3)
     @test all(power(mat) .== zeros(3))
+
+    # Two-sided Sensor material
+    mat = RT.TwoSidedSensor(1)
+    @test all(power(mat) .== 0.0)
+    @test all(power(mat, front = false) .== 0.0)
+    mat = RT.TwoSidedSensor(3)
+    @test all(power(mat) .== zeros(3))
+    @test all(power(mat, front = false) .== zeros(3))
 end

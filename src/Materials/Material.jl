@@ -15,6 +15,7 @@
 include("Lambertian.jl")
 include("Phong.jl")
 include("Sensor.jl")
+include("TwoSidedSensor.jl")
 include("Black.jl")
 
 """
