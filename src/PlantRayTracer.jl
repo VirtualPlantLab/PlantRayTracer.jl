@@ -28,7 +28,7 @@ import PlantGeomPrimitives: Vec, O, X, Y, Z, Mesh, areas,
 
 # Raytracing API
 export RayTracer, RTSettings, trace!, Naive, accelerate, Directional,
-    Source, LambertianSource, DirectionalSource, PointSource, LineSource, AreaSource,
+    Source, LambertianSource, DirectionalSource, PointSource, LineSource, AreaSource, TwoSidedSensor,
     tau, rho, Lambertian, Phong, Sensor, Black,
     get_nw, FixedSource, reset!, power, BVH, SAH, AvgSplit
 
