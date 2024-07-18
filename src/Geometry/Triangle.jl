@@ -45,7 +45,7 @@ julia> t = PlantRayTracer.Triangle(Vec(1.0, 0.0, 1.0), Vec(0.0, 1.0, .0), Vec(1.
 function Triangle(p1::Vec, p2::Vec, p3::Vec)
     e1 = p2 .- p1
     e2 = p3 .- p1
-    Triangle(p1, e1, e2, normalize(cross(e1, e2)))
+    Triangle(p1, e1, e2, normalize(cross(e2, e1)))
 end
 
 """

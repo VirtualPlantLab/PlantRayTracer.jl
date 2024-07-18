@@ -28,17 +28,17 @@ let
     # Simple Triangle construction (check FT)
     FT = Float64
     t64 = RT.Triangle(RT.O(FT), RT.X(FT), RT.Y(FT))
-    @test t64.p == RT.O(FT)
+    @test t64.p  == RT.O(FT)
     @test t64.e1 == RT.X(FT)
     @test t64.e2 == RT.Y(FT)
-    @test t64.n == RT.Z(FT)
+    @test t64.n  == -RT.Z(FT)
 
     FT = Float32
     t32 = RT.Triangle(RT.O(FT), RT.X(FT), RT.Y(FT))
-    @test t32.p == RT.O(FT)
+    @test t32.p  == RT.O(FT)
     @test t32.e1 == RT.X(FT)
     @test t32.e2 == RT.Y(FT)
-    @test t32.n == RT.Z(FT)
+    @test t32.n  == -RT.Z(FT)
 
     # Simple AABB construction (check FT)
     FT = Float64
@@ -365,4 +365,11 @@ let
     mat = RT.TwoSidedSensor(3)
     @test all(power(mat) .== zeros(3))
     @test all(power(mat, front = false) .== zeros(3))
+
+    ##### Triangle conversion #####
+    # Make sure normal vectors are not inverted!
+    r = PlantGeomPrimitives.Rectangle()
+    ts = RT.Triangle(r)
+    @test all(r.normals[1] .== ts[1].n)
+    @test all(r.normals[2] .== ts[2].n)
 end

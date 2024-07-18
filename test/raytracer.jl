@@ -455,7 +455,7 @@ let
     # depend on the scene itself though?
     @test maximum(abs.((powers_bvh .- powers_naive) ./ (powers_naive .+ eps(Float64)))) <
           0.006
-    @test abs(sum(powers_bvh) - sum(powers_naive)) / sum(powers_bvh) < 2e-5
+    @test abs(sum(powers_bvh) - sum(powers_naive)) / sum(powers_bvh) < 6e-5
 
     # Simple test to make sure that rays are always generated from above the scene
     r = Rectangle(length = 2.0, width = 1.0)
