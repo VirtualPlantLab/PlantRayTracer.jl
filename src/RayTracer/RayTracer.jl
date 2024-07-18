@@ -274,12 +274,6 @@ function trace!(rt::RayTracer)
         end
         net_rays = sum(net_rays_thread)
         total_rays = sum(total_rays_thread)
-        # Copy the power stored in each material back to the original
-        # for it in 1:nthreads()
-        #     for im in 1:length(rt.materials)
-        #         @inbounds rt.materials[im].power .+= materials[it][im].power
-        #     end
-        # end
         # Run ray tracer in a single multiple thread
     else
         net_rays, total_rays = trace_thread!(rt,
@@ -340,13 +334,13 @@ function trace!(r::Ray{FT}, rt::RayTracer, materials, tnodestack::Vector{Int},
             tdstack,
             nodestack,
             dstack)
-        !hit && (return (iteration, nrays_traced))#(@show loops; return iteration)
+        !hit && (return (iteration, nrays_traced))
         material = materials[intersection.id]
         # Interaction with surface material
         interaction = calculate_interaction(material, power, r, intersection, rng)
         absorb_power!(material, power, interaction)
         # Russian roulette
-        roulette!(power, rt.settings, iteration, rng) && (return (iteration, nrays_traced))#(@show loops; return iteration)
+        roulette!(power, rt.settings, iteration, rng) && (return (iteration, nrays_traced))
         # Generate new ray
         r = generate_ray(material, r, disp, intersection, interaction, rng)
         # Increase iteration counter (unless it is a sensor-like material)
