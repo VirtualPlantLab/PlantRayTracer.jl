@@ -352,7 +352,7 @@ let
     scene = PGP.Scene(graph1)
     scene_extra = PGP.Scene(graph2)
     mat = PRT.Lambertian(τ = (0.1, 0.1), ρ = (0.2, 0.2))
-    PGP.add!(scene, mesh = scene_extra.mesh, material = mat, color = rand(RGB))
+    PGP.add!(scene, mesh = scene_extra.mesh, materials = mat, colors = rand(RGB))
     #render_scene(scene)
 
     # Naive + Serial

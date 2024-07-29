@@ -70,9 +70,9 @@ let
     scene = Scene(Koch)
     @test length(materials(scene)) == 3
     @test eltype(materials(scene)) == Material
-    @test length(Geom.material_ids(scene)) == length(Geom.faces(scene))
+    @test length(Geom.material_ids(scene)) == ntriangles(mesh(scene))
     @test maximum(Geom.material_ids(scene)) == length(materials(scene))
-    @test length(Geom.faces(scene)) == 120
+    @test ntriangles(mesh(scene)) == 120
 
     ##### Test intersection of specific rays with Naive acc #####
 
@@ -81,9 +81,8 @@ let
     radiosity = 1.0
     rect = Rectangle(length = 1.0, width = 1.0)
     rotatey!(rect, -π / 2) # To put it in the XY plane
-    material = [Black()]
-    ids = [1, 1]
-    scene = Scene(mesh = rect, material_ids = ids, materials = material)
+    material = Black()
+    scene = Scene(mesh = rect, materials = material)
     gbox = RT.AABB(scene)
     source = DirectionalSource(gbox, θ = 0.0, Φ = 0.0, radiosity = radiosity, nrays = nrays)
     settings = RTSettings(pkill = 1.0, maxiter = 1)
@@ -91,7 +90,7 @@ let
     nrays, _ = trace!(rtobj)
 
     @test nrays == nrays
-    pow_abs = material[1].power[1]
+    pow_abs = material.power[1]
     pow_gen = source.power[1] * source.nrays
     @test pow_abs ≈ pow_gen
 
@@ -104,16 +103,15 @@ let
     radiosity = 1.0
     rect = Rectangle(length = 2.0, width = 1.0)
     rotatey!(rect, -π / 2) # To put it in the XY plane
-    material = [Black()]
-    ids = [1, 1]
-    scene = Scene(mesh = rect, material_ids = ids, materials = material)
+    material = Black()
+    scene = Scene(mesh = rect, materials = material)
     gbox = RT.AABB(scene)
     source = DirectionalSource(gbox, θ = 0.0, Φ = 0.0, radiosity = radiosity, nrays = nrays)
     settings = RTSettings(pkill = 1.0, maxiter = 1, nx = 3, ny = 3)
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
     nrays_traced, _ = trace!(rtobj)
     @test nrays_traced == nrays
-    pow_abs = material[1].power[1]
+    pow_abs = material.power[1]
     pow_gen = source.power[1] * source.nrays
     @test pow_abs ≈ pow_gen
 
@@ -122,9 +120,8 @@ let
     radiosity = 1.0
     rect = Rectangle(length = 2.0, width = 1.0)
     rotatey!(rect, -π / 2) # To put it in the XY plane
-    material = [Black()]
-    ids = [1, 1]
-    scene = Scene(mesh = rect, material_ids = ids, materials = material)
+    material = Black()
+    scene = Scene(mesh = rect, materials = material)
     gbox = RT.AABB(scene)
     source = DirectionalSource(gbox,
         θ = π / 2,
@@ -135,7 +132,7 @@ let
     rtobj = RayTracer(scene, source, settings = settings, acceleration = Naive)
     nrays_traced, _ = trace!(rtobj)
     @test nrays_traced == nrays
-    pow_abs = material[1].power[1]
+    pow_abs = material.power[1]
     pow_gen = source.power[1] * source.nrays
     @test pow_abs == 0.0
 
@@ -144,9 +141,8 @@ let
     radiosity = 1.0
     rect = Rectangle(length = 2.0, width = 1.0)
     rotatey!(rect, -π / 2) # To put it in the XY plane
-    material = [Black()]
-    ids = [1, 1]
-    scene = Scene(mesh = rect, material_ids = ids, materials = material)
+    material = Black()
+    scene = Scene(mesh = rect, materials = material)
     gbox = RT.AABB(scene)
     source = DirectionalSource(gbox,
         θ = π / 4,
@@ -157,7 +153,7 @@ let
     rtobj = RayTracer(scene, [source], settings = settings, acceleration = Naive)
     nrays_traced, _ = trace!(rtobj)
     @test nrays_traced == nrays
-    pow_abs = material[1].power[1]
+    pow_abs = material.power[1]
     pow_gen = source.power[1] * source.nrays
     @test pow_abs ≈ pow_gen
     @test pow_abs / area(rect) ≈ radiosity*cos(π/4)
@@ -176,9 +172,10 @@ let
     translate!(rect2, Z())
     translate!(rect3, 2.0 * Z())
     rectangles = Mesh([rect1, rect2, rect3])
-    mats = [Sensor() for i in 1:3]
-    ids = [1, 1, 2, 2, 3, 3]
-    scene = Scene(mesh = rectangles, material_ids = ids, materials = mats)
+    mats = [Sensor() for _ in 1:3]
+    ext_mats = mats[[1,1,2,2,3,3]]
+    #ids = [1, 1, 2, 2, 3, 3]
+    scene = Scene(mesh = rectangles, materials = ext_mats)
     gbox = RT.AABB(scene)
     source = DirectionalSource(scene,
         θ = 0.0,
@@ -234,8 +231,8 @@ let
     translate!(rect3, 2.0 * Z())
     rectangles = Mesh([rect1, rect2, rect3])
     mats = [Lambertian(τ = 0.3, ρ = 0.3) for i in 1:3]
-    ids = [1, 1, 2, 2, 3, 3]
-    scene = Scene(mesh = rectangles, material_ids = ids, materials = mats)
+    ext_mats = mats[[1, 1, 2, 2, 3, 3]]
+    scene = Scene(mesh = rectangles, materials = ext_mats)
     gbox = RT.AABB(scene)
     source = DirectionalSource(gbox, θ = 0.0, Φ = 0.0, radiosity = radiosity, nrays = nrays)
     # Need to make sure maxiter > 1 or it will stop after the first sensor
@@ -272,9 +269,9 @@ let
     radiosity = 1.0
     rect = Rectangle(length = 1.0, width = 1.5)
     rotatey!(rect, -π / 2) # To put it in the XY plane
-    mat = [Black()]
-    ids = [1, 1]
-    scene = Scene(mesh = rect, material_ids = ids, materials = mat)
+    mat = Black()
+    ex_mat = [mat,mat]
+    scene = Scene(mesh = rect, materials = ex_mat)
     gbox = RT.AABB(scene)
     source = DirectionalSource(scene,
         θ = 0.0,
@@ -287,7 +284,7 @@ let
     nrays, _ = trace!(rtobj)
 
     @test nrays == nrays
-    RTirr = mat[1].power[1] ./ area(rect)
+    RTirr = mat.power[1] ./ area(rect)
     @test RTirr ≈ radiosity
 
     # render(rect)
@@ -300,9 +297,9 @@ let
     radiosity = 1.0
     rect = Rectangle(length = 3.0, width = 1.0)
     rotatey!(rect, -π / 2) # To put it in the XY plane
-    mat = [Black()]
-    ids = [1, 1]
-    scene = Scene(mesh = rect, material_ids = ids, materials = mat)
+    mat = Black()
+    ex_mat = [mat,mat]
+    scene = Scene(mesh = rect, materials = ex_mat)
     gbox = RT.AABB(scene)
     source = DirectionalSource(scene,
         θ = 0.0,
@@ -314,7 +311,7 @@ let
         rule = SAH{1}(2, 5))
     nrays_traced, _ = trace!(rtobj)
     @test nrays_traced == nrays
-    RTirr = mat[1].power[1] / area(rect)
+    RTirr = mat.power[1] / area(rect)
     @test RTirr ≈ radiosity
 
     # Intersection of a rectangle from a directional light source downwards (sensor)
@@ -330,8 +327,8 @@ let
     translate!(rect3, 2.0 * Z())
     rectangles = Mesh([rect1, rect2, rect3])
     mats = [Sensor() for i in 1:3]
-    ids = [1, 1, 2, 2, 3, 3]
-    scene = Scene(mesh = rectangles, material_ids = ids, materials = mats)
+    ext_mats = mats[[1, 1, 2, 2, 3, 3]]
+    scene = Scene(mesh = rectangles, materials = ext_mats)
     gbox = RT.AABB(scene)
     source = DirectionalSource(gbox, θ = 0.0, Φ = 0.0, radiosity = radiosity, nrays = nrays)
     # Need to make sure maxiter > 1 or it will stop after the first sensor
@@ -367,8 +364,8 @@ let
     translate!(rect3, 2.0 * Z())
     rectangles = Mesh([rect1, rect2, rect3])
     mats = [Lambertian(τ = 0.3, ρ = 0.3) for i in 1:3]
-    ids = [1, 1, 2, 2, 3, 3]
-    scene = Scene(mesh = rectangles, material_ids = ids, materials = mats)
+    ex_mats = mats[[1, 1, 2, 2, 3, 3]]
+    scene = Scene(mesh = rectangles, materials = ex_mats)
     gbox = RT.AABB(scene)
     source = DirectionalSource(gbox,
         θ = π / 4,
@@ -464,8 +461,8 @@ let
     r2 = deepcopy(r)
     translate!(r2, Vec(0.0, 0.0, -1.0))
     mats = [Black(), Black()]
-    ids = [1, 1, 2, 2]
-    scene = Scene(mesh = Mesh([r, r2]), material_ids = ids, materials = mats)
+    ex_mats = mats[[1, 1, 2, 2]]
+    scene = Scene(mesh = Mesh([r, r2]), materials = ex_mats)
     sources = DirectionalSource(scene,
         θ = π / 2 * 0.99,
         Φ = 0.0,
@@ -510,7 +507,7 @@ let
     rule = Rule(sn.E2, rhs = Kochsnowflake)
     Koch = Graph(axiom = axiom, rules = Tuple(rule))
     scene = Scene(Koch, message = "raytracer")
-    add!(scene, mesh = r, material = Black(1), color = RGB(0.5, 0.5, 0.0))
+    add!(scene, mesh = r, materials = Black(1), colors = RGB(0.5, 0.5, 0.0))
     @test all(Geom.material_ids(scene) .== vcat(collect(1:24), [25, 25]))
     sources = DirectionalSource(scene, θ = π / 4, Φ = 0.0, radiosity = 1.0, nrays = nrays)
     settings = RTSettings(parallel = true)
@@ -518,19 +515,19 @@ let
     nrays_traced, _ = trace!(rtobj)
     @test length(filter(x -> x.power[1] > 0.0, scene.materials)) == 5 # only 4 faces are seen (+ soil)
     scene = Scene(Koch, message = "render")
-    add!(scene, mesh = r, material = Black(1), color = RGB(0.5, 0.5, 0.0))
+    add!(scene, mesh = r, materials = Black(1), colors = RGB(0.5, 0.5, 0.0))
     # render(scene)
     # render!(sources)
 
     scene = Scene(Koch, message = "raytracer")
-    add!(scene, mesh = r, material = Black(1), color = RGB(0.5, 0.5, 0.0))
+    add!(scene, mesh = r, materials = Black(1), colors = RGB(0.5, 0.5, 0.0))
     sources = DirectionalSource(scene, θ = π / 4, Φ = π / 2, radiosity = cos(π / 4), nrays = nrays)
     settings = RTSettings(parallel = true)
     rtobj = RayTracer(scene, sources, settings = settings)
     nrays_traced, _ = trace!(rtobj)
     @test length(filter(x -> x.power[1] > 0.0, scene.materials)) == 17 # 8 faces seen (+ soil)
     scene = Scene(Koch, message = "render")
-    add!(scene, mesh = r, material = Black(1), color = RGB(0.5, 0.5, 0.0))
+    add!(scene, mesh = r, materials = Black(1), colors = RGB(0.5, 0.5, 0.0))
     # render(scene)
     # render!(sources)
 
