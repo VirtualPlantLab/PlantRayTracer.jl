@@ -7,6 +7,7 @@ import LinearAlgebra: ⋅, norm
 import Random
 using StaticArrays
 import ColorTypes: RGB, RGBA
+import StatsBase
 
 let
 
@@ -208,7 +209,6 @@ let
     source = RT.AreaSource(r)
     source.tvec isa Vector
     @test first(source.tvec) isa RT.Triangle
-    import StatsBase
     @test source.areas isa StatsBase.Weights
     @test sum(source.areas) ≈ 2 * 2
 
