@@ -61,7 +61,7 @@ end
 function generate_point(d::Directional{FT}, rng) where {FT}
     x = d.xmin + rand(rng, FT) * (d.xmax - d.xmin)
     y = d.ymin + rand(rng, FT) * (d.ymax - d.ymin)
-    Vec(x, y, d.zmax + 5eps(FT))
+    Vec(x, y, d.zmax + 100eps(FT))
 end
 
 # # Create geometry for a directional light source
