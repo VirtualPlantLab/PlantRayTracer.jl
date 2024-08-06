@@ -16,6 +16,14 @@ struct Triangle{FT}
     n::Vec{FT}
 end
 
+# Compute edges and normal vector of a triangle for barycentric coordinates
+function barycentric(p1, p2, p3)
+    e1 = p2 .- p1
+    e2 = p3 .- p1
+    n = normalize(cross(e2, e1))
+    return e1, e2, n
+end
+
 """
     Triangle()
 
@@ -43,9 +51,8 @@ julia> t = PlantRayTracer.Triangle(Vec(1.0, 0.0, 1.0), Vec(0.0, 1.0, .0), Vec(1.
 ```
 """
 function Triangle(p1::Vec, p2::Vec, p3::Vec)
-    e1 = p2 .- p1
-    e2 = p3 .- p1
-    Triangle(p1, e1, e2, normalize(cross(e2, e1)))
+    e1, e2, n = barycentric(p1, p2, p3)
+    Triangle(p1, e1, e2, n)
 end
 
 """
@@ -62,8 +69,20 @@ julia> e = Ellipse();
 julia> t = PlantRayTracer.Triangle(e);
 ```
 """
-function Triangle(mesh::Mesh)
-    [Triangle(vertices(mesh)[face]...) for face in faces(mesh)]
+function Triangle(mesh::Mesh{VT}) where {VT}
+    FT = eltype(VT)
+    output = Triangle{FT}[]
+    sizehint!(output, ntriangles(mesh))
+    for i in 1:ntriangles(mesh)
+        j  = (i - 1)*3
+        p1 = vertices(mesh)[j + 1]
+        p2 = vertices(mesh)[j + 2]
+        p3 = vertices(mesh)[j + 3]
+        e1 = p2 .- p1
+        e2 = p3 .- p1
+        push!(output, Triangle(p1, e1, e2, normals(mesh)[i]))
+    end
+    return output
 end
 
 """
