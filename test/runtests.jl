@@ -31,3 +31,8 @@ end
 @testset "Ray tracing scenes" begin
     include("raytracer.jl")
 end
+
+# Test shade clothes and profiles of radiation
+@testset "Shade nets" begin
+    include("shade_net.jl")
+end
