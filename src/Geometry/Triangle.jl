@@ -70,6 +70,7 @@ julia> t = PlantRayTracer.Triangle(e);
 ```
 """
 function Triangle(mesh::Mesh{VT}) where {VT}
+    update_normals!(mesh)
     FT = eltype(VT)
     output = Triangle{FT}[]
     sizehint!(output, ntriangles(mesh))

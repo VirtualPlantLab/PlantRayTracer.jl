@@ -24,7 +24,7 @@ import PlantGeomPrimitives as PG
 import PlantGeomPrimitives: Vec, O, X, Y, Z, Mesh, areas,
     ntriangles, Ellipse, rotate!, translate!, BBox,
     Scene, vertices, mesh, normals, material_ids, materials,
-    Material, add!
+    Material, add!, update_normals!
 
 # Raytracing API
 export RayTracer, RTSettings, trace!, Naive, accelerate, Directional,
