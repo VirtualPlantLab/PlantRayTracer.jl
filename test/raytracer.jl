@@ -61,8 +61,8 @@ let
     end
     function PlantGeomTurtle.feed!(turtle::Turtle, e::sn.E64, data)
         HollowCylinder!(turtle, length = e.length, width = e.length / 10,
-            height = e.length / 10, move = true, material = e.mat,
-            color = rand(RGB))
+            height = e.length / 10, move = true, materials = e.mat,
+            colors = rand(RGB))
         return nothing
     end
     rule = Rule(sn.E64, rhs = Kochsnowflake)
@@ -389,8 +389,8 @@ let
 
     function PlantGeomTurtle.feed!(turtle::Turtle, i::btree.Internode, vars)
         HollowCube!(turtle, length = i.length, height = i.length / 10,
-            width = i.length / 10, move = true, color = RGB(0, 1, 0),
-            material = i.mat)
+            width = i.length / 10, move = true, colors = RGB(0, 1, 0),
+            materials = i.mat)
         return nothing
     end
     rule = Rule(btree.Meristem,
@@ -494,13 +494,13 @@ let
     function PlantGeomTurtle.feed!(turtle::Turtle, e::sn.E2, vars)
         if turtle.message == "raytracer"
             HollowCube!(turtle, length = e.length, width = e.length / 10,
-                height = e.length / 10, move = true, material = e.mat)
+                height = e.length / 10, move = true, materials = e.mat)
         elseif turtle.message == "render"
             powers = getindex.(power.(e.mat), 1)
             color = any(powers .> 0.0) ? RGB(1.0, 0.0, 0.0) : RGB(0.0, 0.0, 0.0)
             HollowCube!(turtle, length = e.length, width = e.length / 10,
                 height = e.length / 10, move = true,
-                color = color)
+                colors = color)
         end
         return nothing
     end

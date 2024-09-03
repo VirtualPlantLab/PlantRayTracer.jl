@@ -30,19 +30,19 @@ import .Tiles
 function PGT.feed!(turtle::PGT.Turtle, tile::Tiles.Tile, data)
     PGT.t!(turtle, to = PGP.Vec(0.0, 0.0, tile.height))
     PGT.Rectangle!(turtle, length = 1.0, width = 1.0,
-                   material = tile.mat, color = rand(RGB))
+                   materials = tile.mat, colors = rand(RGB))
     return nothing
 end
 function PGT.feed!(turtle::PGT.Turtle, shade::Tiles.Shade, data)
     PGT.t!(turtle, to = PGP.Vec(0.0, 0.0, shade.height))
     PGT.Rectangle!(turtle, length = 1.0, width = 1.0,
-                   material = shade.mat, color = rand(RGBA))
+                   materials = shade.mat, colors = rand(RGBA))
     return nothing
 end
 function PGT.feed!(turtle::PGT.Turtle, sensor::Tiles.LightSensor, data)
     PGT.t!(turtle, to = PGP.Vec(0.0, 0.0, sensor.height))
     PGT.Rectangle!(turtle, length = 1.0, width = 1.0,
-                   material = sensor.mat, color = rand(RGBA))
+                   materials = sensor.mat, colors = rand(RGBA))
     return nothing
 end
 
