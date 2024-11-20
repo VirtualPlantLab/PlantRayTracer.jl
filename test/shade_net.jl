@@ -29,19 +29,19 @@ import .Tiles
 
 function PGT.feed!(turtle::PGT.Turtle, tile::Tiles.Tile, data)
     PGT.t!(turtle, to = PGP.Vec(0.0, 0.0, tile.height))
-    PGT.Rectangle!(turtle, length = 1.0, width = 1.0,
+    PGP.Rectangle!(turtle, length = 1.0, width = 1.0,
                    materials = tile.mat, colors = rand(RGB))
     return nothing
 end
 function PGT.feed!(turtle::PGT.Turtle, shade::Tiles.Shade, data)
     PGT.t!(turtle, to = PGP.Vec(0.0, 0.0, shade.height))
-    PGT.Rectangle!(turtle, length = 1.0, width = 1.0,
+    PGP.Rectangle!(turtle, length = 1.0, width = 1.0,
                    materials = shade.mat, colors = rand(RGBA))
     return nothing
 end
 function PGT.feed!(turtle::PGT.Turtle, sensor::Tiles.LightSensor, data)
     PGT.t!(turtle, to = PGP.Vec(0.0, 0.0, sensor.height))
-    PGT.Rectangle!(turtle, length = 1.0, width = 1.0,
+    PGP.Rectangle!(turtle, length = 1.0, width = 1.0,
                    materials = sensor.mat, colors = rand(RGBA))
     return nothing
 end
@@ -55,9 +55,9 @@ for i in 1:2:20
     axiom += Tiles.Shade(height = Float64(i)) + Tiles.LightSensor(height = Float64(i + 1))
 end
 g     = PG.Graph(axiom = axiom);
-scene = PGT.Scene(g);
-PGT.colors(scene)
-PGT.vertices(scene)
+scene = PGP.Scene(g);
+PGP.colors(scene)
+PGP.vertices(scene)
 #PV.render(scene, normals = true)
 
 
