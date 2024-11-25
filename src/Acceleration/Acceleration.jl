@@ -5,14 +5,14 @@
 intersection of a ray with a triangle
 =#
 struct Intersection{FT}
-    pint::Vec{FT}
-    axes::NTuple{3, Vec{FT}}
+    pint::PGP.Vec{FT}
+    axes::NTuple{3, PGP.Vec{FT}}
     front::Bool
     id::Int64
 end
 function Intersection(::Type{FT}) where {FT}
     f = zero(FT)
-    v = Vec(f, f, f)
+    v = PGP.Vec(f, f, f)
     Intersection(v, (v, v, v), false, 0)
 end
 

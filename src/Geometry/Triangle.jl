@@ -10,10 +10,10 @@
 # e2 = Like e1, but for the other side of the triangle
 # n = Normal unit vector (defined by cross product of e1 and e2)
 struct Triangle{FT}
-    p::Vec{FT}
-    e1::Vec{FT}
-    e2::Vec{FT}
-    n::Vec{FT}
+    p::PGP.Vec{FT}
+    e1::PGP.Vec{FT}
+    e2::PGP.Vec{FT}
+    n::PGP.Vec{FT}
 end
 
 # Compute edges and normal vector of a triangle for barycentric coordinates
@@ -35,7 +35,7 @@ julia> t = PlantRayTracer.Triangle();
 ```
 """
 function Triangle()
-    Triangle(X(), Y(), Z())
+    Triangle(PGP.X(), PGP.Y(), PGP.Z())
 end
 
 """
@@ -50,7 +50,7 @@ julia> using PlantGeomPrimitives
 julia> t = PlantRayTracer.Triangle(Vec(1.0, 0.0, 1.0), Vec(0.0, 1.0, .0), Vec(1.0, 1.0, 1.0));
 ```
 """
-function Triangle(p1::Vec, p2::Vec, p3::Vec)
+function Triangle(p1::PGP.Vec, p2::PGP.Vec, p3::PGP.Vec)
     e1, e2, n = barycentric(p1, p2, p3)
     Triangle(p1, e1, e2, n)
 end
@@ -69,19 +69,19 @@ julia> e = Ellipse();
 julia> t = PlantRayTracer.Triangle(e);
 ```
 """
-function Triangle(mesh::Mesh{VT}) where {VT}
-    update_normals!(mesh)
+function Triangle(mesh::PGP.Mesh{VT}) where {VT}
+    PGP.update_normals!(mesh)
     FT = eltype(VT)
     output = Triangle{FT}[]
-    sizehint!(output, ntriangles(mesh))
-    for i in 1:ntriangles(mesh)
+    sizehint!(output, PGP.ntriangles(mesh))
+    for i in 1:PGP.ntriangles(mesh)
         j  = (i - 1)*3
-        p1 = vertices(mesh)[j + 1]
-        p2 = vertices(mesh)[j + 2]
-        p3 = vertices(mesh)[j + 3]
+        p1 = PGP.vertices(mesh)[j + 1]
+        p2 = PGP.vertices(mesh)[j + 2]
+        p3 = PGP.vertices(mesh)[j + 3]
         e1 = p2 .- p1
         e2 = p3 .- p1
-        push!(output, Triangle(p1, e1, e2, normals(mesh)[i]))
+        push!(output, Triangle(p1, e1, e2, PGP.normals(mesh)[i]))
     end
     return output
 end
@@ -100,8 +100,8 @@ julia> sc = Scene(mesh = Ellipse());
 julia> t = PlantRayTracer.Triangle(sc);
 ```
 """
-function Triangle(scene::Scene)
-    Triangle(mesh(scene))
+function Triangle(scene::PGP.Scene)
+    Triangle(PGP.mesh(scene))
 end
 
 # Moller-Trumbore intersection test with early exits

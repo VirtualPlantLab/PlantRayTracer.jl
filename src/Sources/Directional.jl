@@ -28,7 +28,7 @@ function DirectionalSource(box::AABB; θ, Φ, radiosity, nrays)
     power = radiosity .* area(dir_geom)
     out = Source(dir_geom, FixedSource(θ, Φ), power./nrays, nrays)
 end
-function DirectionalSource(scene::Scene; θ, Φ, radiosity, nrays)
+function DirectionalSource(scene::PGP.Scene; θ, Φ, radiosity, nrays)
     box = AABB(scene)
     DirectionalSource(box, θ = θ, Φ = Φ, radiosity = radiosity, nrays = nrays)
 end
@@ -61,40 +61,5 @@ end
 function generate_point(d::Directional{FT}, rng) where {FT}
     x = d.xmin + rand(rng, FT) * (d.xmax - d.xmin)
     y = d.ymin + rand(rng, FT) * (d.ymax - d.ymin)
-    Vec(x, y, d.zmax + 100eps(FT))
+    PGP.Vec(x, y, d.zmax + 100eps(FT))
 end
-
-# # Create geometry for a directional light source
-# function create_directional(box::AABB{FT}, θ::FT, Φ::FT) where FT
-#     # Scaling
-#     Δx, Δy, Δz = (box.max .- box.min)
-#     Δs = max(Δx, Δy, Δz)*sqrt(FT(2))/2
-#     s = scale(Δs, Δs, Δs)
-#     # Rotation
-#     r = rotatez(-Φ) ∘ rotatex(-θ)
-#     n = r(Z(FT))
-#     # Translation
-#     d = Vec(Δx/2, Δy/2, Δz/2)
-#     p = (box.max .+ box.min)./2 .+ Vec(FT(0), FT(0), (box.max[3] - box.min[3])/2)
-#     t = Translation(p .+ n.*Δs)
-#     # Transformation
-#     trans = t ∘ r ∘ s
-#     # Generate the three points of the ellipse
-#     po = trans(O(FT))
-#     px = trans(X(FT))
-#     py = trans(Y(FT))
-#     rx = px .- po
-#     ry = py .- po
-#     # Create the directional source object outside ellipsoid
-#     Directional(po, rx, ry)
-# end
-
-# # Select a point from the project ellipse as origin of a ray
-# # Notice the use of sqrt() to account for larger area as one moves away from center
-# function generate_point(g::Directional{FT}, rng) where FT
-#     r = sqrt(rand(rng, FT))
-#     θ = FT(2)*FT(pi)*rand(rng, FT)
-#     dx = @. r*g.rx*cos(θ)
-#     dy  = @. r*g.ry*sin(θ)
-#     @. g.po + dx + dy
-# end

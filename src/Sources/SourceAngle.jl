@@ -19,7 +19,7 @@ julia> source_dir = FixedSource(PG.Vec(0.0, 0.0, -1.0));
 ```
 """
 struct FixedSource{FT} <: SourceAngle
-    dir::Vec{FT}
+    dir::PGP.Vec{FT}
 end
 function FixedSource(θ, Φ)
     FixedSource(rotate_coordinates(θ, Φ).z)
@@ -46,9 +46,9 @@ julia> source_dir = LambertianSource((PG.X(), PG.Y(), PG.Z()));
 ```
 """
 struct LambertianSource{FT} <: SourceAngle
-    x::Vec{FT}
-    y::Vec{FT}
-    z::Vec{FT}
+    x::PGP.Vec{FT}
+    y::PGP.Vec{FT}
+    z::PGP.Vec{FT}
 end
 LambertianSource(axes) = LambertianSource(axes...)
 

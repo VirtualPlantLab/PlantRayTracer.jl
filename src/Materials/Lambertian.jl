@@ -5,10 +5,10 @@
   General material that assumes Lambertian transmittance and a combination
 of Lambertian and Phong reflectance
 =#
-struct Lambertian{nw} <: Material
-    power::MVector{nw, Float64}
-    τ::SVector{nw, Float64}
-    ρ::SVector{nw, Float64}
+struct Lambertian{nw} <: PGP.Material
+    power::SA.MVector{nw, Float64}
+    τ::SA.SVector{nw, Float64}
+    ρ::SA.SVector{nw, Float64}
 end
 
 """
@@ -30,18 +30,18 @@ function Lambertian(; τ = 0.0, ρ = 0.0)
 end
 
 function Lambertian(τ::Tuple, ρ::Tuple)
-    Lambertian(SVector(τ), SVector(ρ))
+    Lambertian(SA.SVector(τ), SA.SVector(ρ))
 end
 
-function Lambertian(τ::SVector, ρ::SVector)
+function Lambertian(τ::SA.SVector, ρ::SA.SVector)
     nw = length(τ)
-    power = @MVector zeros(nw)
-    Lambertian(power, SVector(τ), SVector(ρ))
+    power = SA.@MVector zeros(nw)
+    Lambertian(power, SA.SVector(τ), SA.SVector(ρ))
 end
 
 function Lambertian(τ::Real, ρ::Real)
-    power = @MVector zeros(1)
-    Lambertian(power, SVector(τ), SVector(ρ))
+    power = SA.@MVector zeros(1)
+    Lambertian(power, SA.SVector(τ), SA.SVector(ρ))
 end
 
 ###############################################################################
@@ -68,7 +68,7 @@ function absorb_power!(material::Lambertian, power, interaction)
     @inbounds begin
         for i in eachindex(power)
             Δpower = power[i] * (1.0 - interaction.coef[i])
-            @atomic material.power[i] += Δpower #material.power[i] += power[i] * (1.0 - interaction.coef[i]) #
+            Atomix.@atomic material.power[i] += Δpower #material.power[i] += power[i] * (1.0 - interaction.coef[i]) #
             power[i] *= interaction.coef[i]
         end
         return nothing
@@ -80,7 +80,7 @@ Generate a new ray using information in intersection and interaction
 =#
 function generate_ray(material::Lambertian,
     ray::Ray{FT},
-    disp::Vec{FT},
+    disp::PGP.Vec{FT},
     intersection,
     interaction,
     rng) where {FT}

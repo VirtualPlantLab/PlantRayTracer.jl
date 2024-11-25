@@ -34,12 +34,12 @@ julia> reset!(l);
 julia> l;
 ```
 """
-function reset!(material::Material)
+function reset!(material::PGP.Material)
     material.power .= 0.0
     return nothing
 end
-function reset!(materials::Vector{<:Material})
-    @threads for mat in materials
+function reset!(materials::Vector{<:PGP.Material})
+    T.@threads for mat in materials
         reset!(mat)
     end
 end
@@ -56,6 +56,6 @@ julia> l = Lambertian(τ = 0.1, ρ = 0.2);
 julia> power(l);
 ```
 """
-function power(mat::Material)
+function power(mat::PGP.Material)
     mat.power
 end

@@ -8,11 +8,11 @@
 struct TNODE{FT}
     box::AABB{FT}
     leaf::Bool
-    disp::Vec{FT}
+    disp::PGP.Vec{FT}
 end
 
 # Shortcut to create intermediate TNODES in the binary tree of the grid cloner
-TNODE(box::AABB{FT}, leaf) where {FT} = TNODE(box, leaf, Vec{FT}(0, 0, 0))
+TNODE(box::AABB{FT}, leaf) where {FT} = TNODE(box, leaf, PGP.Vec{FT}(0, 0, 0))
 
 # Structure that contains the binary tree required to traverse the grid cloner
 struct GridCloner{FT}
@@ -34,7 +34,7 @@ function GridCloner(acc::Acceleration{FT}; nx = 3, ny = 3, nz = 0,
     gbox = acc.gbox
     isempty(acc.gbox) ||
         nx == ny == nz == 0 &&
-            (return GridCloner(GVector([TNODE(gbox, true, Vec{FT}(0, 0, 0))]), 1))
+            (return GridCloner(GVector([TNODE(gbox, true, PGP.Vec{FT}(0, 0, 0))]), 1))
     # Create all the leaf TNODES, their centers and indices
     scene = create_tnodes(nx, ny, nz, dx, dy, dz, gbox)
     indices = collect(1:length(scene.nodes))
@@ -54,7 +54,7 @@ function create_tnodes(nx, ny, nz, dx::FT, dy::FT, dz::FT, box) where {FT}
 
     # Special case when only one node in the grid cloner
     if nnodes == 1
-        leaves = [TNODE(box, true, Vec{FT}(0, 0, 0))]
+        leaves = [TNODE(box, true, PGP.Vec{FT}(0, 0, 0))]
         centers = hcat(FT(0), FT(0), FT(0))
         return leaves, centers
     end
@@ -69,7 +69,7 @@ function create_tnodes(nx, ny, nz, dx::FT, dy::FT, dz::FT, box) where {FT}
         for j in (-ny):1:ny
             for k in 0:1:nz
                 counter += 1
-                disp = Vec{FT}(i * dx, j * dy, k * dz)
+                disp = PGP.Vec{FT}(i * dx, j * dy, k * dz)
                 nbox = AABB(box.min .+ disp, box.max .+ disp)
                 nodes[counter] = TNODE(nbox, true, disp)
                 boxes[counter] = nbox
@@ -88,7 +88,7 @@ end
 function addNode!(grid::GridCloner, scene, parentbox, parentid, indices)
     # Split the current node and distribute children to each side of the split
     newindices, childrenboxes, leaves = splitnode(grid, parentbox, indices, scene)
-    # Ids of the children in the flattened version of the tree. 
+    # Ids of the children in the flattened version of the tree.
     # First child of a node with order i is given by 2i + 1
     nodesid = Tuple(2 * parentid + i for i in 1:2)
     # Add children to nodes
@@ -132,7 +132,7 @@ end
 
 # Add TNODEs to the grid cloner (either pre-constructed leaf nodes or create new inner node)
 function pushnodes!(grid::GridCloner, scene, nodesid, childrenboxes, newindices, leaves)
-    #@inbounds 
+    #@inbounds
     for i in 1:2
         if leaves[i]
             grid.nodes[nodesid[i]] = scene.nodes[newindices[i]...]
@@ -154,7 +154,7 @@ function Base.intersect(ray::Ray{FT}, grid::GridCloner, acc::Acceleration{FT}, t
     begin
         # Initialize solution state
         dmin = Inf
-        disp = Vec{FT}(0, 0, 0) # Do we still need to return disp?
+        disp = PGP.Vec{FT}(0, 0, 0) # Do we still need to return disp?
         hit = false
         intersection = Intersection(FT)
         # Special case when we only have one node (go directly to acceleration structure)

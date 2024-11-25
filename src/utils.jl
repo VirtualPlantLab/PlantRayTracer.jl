@@ -15,7 +15,7 @@ wavelengths/wavebands to be simulated in a ray tracer.
 julia> tau(1.0, 0.0, 2.0);
 ```
 """
-tau(vals...) = SVector(vals)
+tau(vals...) = SA.SVector(vals)
 
 """
     rho(vals...)
@@ -29,7 +29,7 @@ wavelengths/wavebands to be simulated in a ray tracer.
 julia> rho(1.0, 0.0, 2.0);
 ```
 """
-rho(vals...) = SVector(vals)
+rho(vals...) = SA.SVector(vals)
 
 ###############################################################################
 ################################## Geometry ###################################
@@ -43,7 +43,7 @@ function polar_to_cartesian(axes, θ, Φ)
     dir2 = @. e1 * cos(Φ) * sin(θ)
     dir3 = @. e2 * sin(Φ) * sin(θ)
     dir = @. dir1 + dir2 + dir3
-    Vec(normalize(dir))
+    PGP.Vec(normalize(dir))
 end
 
 # Project a point (p) onto a plane (defined by point pp and normal pn)
@@ -54,17 +54,17 @@ function project(p, pp, pn)
 end
 
 # Help write coordinate transformations
-translate(x, y, z) = Translation(x, y, z)
-rotatex(x) = LinearMap(RotX(x))
-rotatey(x) = LinearMap(RotY(x))
-rotatez(x) = LinearMap(RotZ(x))
+translate(x, y, z) = CT.Translation(x, y, z)
+rotatex(x) = CT.LinearMap(Rotations.RotX(x))
+rotatey(x) = CT.LinearMap(Rotations.RotY(x))
+rotatez(x) = CT.LinearMap(Rotations.RotZ(x))
 
 # Given angles θ and Φ, calculate the flipped coordinate system of the plane
 # Φ clockwise looking against Z - East is positive
 # θ counterclock wise looking against Y - Sunrise is positive
 function rotate_coordinates(θ::FT, Φ::FT) where {FT}
     rot = rotatez(-Φ) ∘ rotatex(-θ)
-    (x = .-rot(X(FT)), y = .-rot(Y(FT)), z = .-rot(Z(FT)))
+    (x = .-rot(PGP.X(FT)), y = .-rot(PGP.Y(FT)), z = .-rot(PGP.Z(FT)))
 end
 
 ###############################################################################

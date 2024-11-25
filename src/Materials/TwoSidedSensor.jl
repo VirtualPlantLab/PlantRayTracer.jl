@@ -5,9 +5,9 @@
   Material that has no effect on the ray and its associated power but accumulates
 the power associated to rays hitting on the front and back side
 =#
-struct TwoSidedSensor{nw} <: Material
-    power_front::MVector{nw, Float64}
-    power_back::MVector{nw, Float64}
+struct TwoSidedSensor{nw} <: PGP.Material
+    power_front::SA.MVector{nw, Float64}
+    power_back::SA.MVector{nw, Float64}
 end
 
 """
@@ -26,8 +26,8 @@ julia> s = TwoSidedSensor(3);
 ```
 """
 function TwoSidedSensor(nw::Int = 1)
-    power_front = @MVector zeros(nw)
-    power_back = @MVector zeros(nw)
+    power_front = SA.@MVector zeros(nw)
+    power_back = SA.@MVector zeros(nw)
     TwoSidedSensor(power_front, power_back)
 end
 
@@ -53,11 +53,11 @@ end
 function absorb_power!(material::TwoSidedSensor, power, interaction)
     if interaction.coef > 0.0
         @inbounds for i in eachindex(power)
-            @atomic material.power_front[i] += power[i]
+            Atomix.@atomic material.power_front[i] += power[i]
         end
     else
         @inbounds for i in eachindex(power)
-            @atomic material.power_back[i] += power[i]
+            Atomix.@atomic material.power_back[i] += power[i]
         end
     end
     return nothing
@@ -68,7 +68,7 @@ end
 =#
 function generate_ray(material::TwoSidedSensor,
     ray::Ray{FT},
-    disp::Vec{FT},
+    disp::PGP.Vec{FT},
     intersection,
     interaction,
     rng) where {FT}

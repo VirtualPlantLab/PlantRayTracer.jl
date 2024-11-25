@@ -5,8 +5,8 @@
   Material that has no effect on the ray and its associated power but accumulates
 all the power associated to the ray
 =#
-struct Black{nw} <: Material
-    power::MVector{nw, Float64}
+struct Black{nw} <: PGP.Material
+    power::SA.MVector{nw, Float64}
 end
 
 """
@@ -22,7 +22,7 @@ julia> b = Black(1);
 julia> b = Black(3);
 ```
 """
-Black(nw::Int = 1) = Black(@MVector zeros(nw))
+Black(nw::Int = 1) = Black(SA.@MVector zeros(nw))
 
 ###############################################################################
 ################################## API ########################################
@@ -40,7 +40,7 @@ end
 =#
 function absorb_power!(material::Black, power, interaction)
     @inbounds for i in eachindex(power)
-        @atomic material.power[i] += power[i]
+        Atomix.@atomic material.power[i] += power[i]
     end
     power .= 0.0
     return nothing
@@ -50,10 +50,10 @@ end
     Just return a ray (we will never get here due to Russian roulette if it is black surface)
 =#
 function generate_ray(material::Black,
-    ray::Vec{FT},
-    disp::Vec{FT},
+    ray::PGP.Vec{FT},
+    disp::PGP.Vec{FT},
     intersection,
     interaction,
     rng) where {FT}
-    Ray(O(FT), O(FT))
+    Ray(PGP.O(FT), PGP.O(FT))
 end

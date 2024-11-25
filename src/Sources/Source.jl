@@ -24,7 +24,7 @@ include("SourceAngle.jl")
 struct Source{G, A, nw}
     geom::G
     angle::A
-    power::SVector{nw, Float64}
+    power::SA.SVector{nw, Float64}
     nrays::Int
 end
 
@@ -50,10 +50,10 @@ julia> Source(source_geom, source_dir, 1.0, 1_000);
 ```
 """
 function Source(geom, angle, power::Number, nrays::Integer)
-    Source(geom, angle, SVector{1, Float64}(power), nrays)
+    Source(geom, angle, SA.SVector{1, Float64}(power), nrays)
 end
 function Source(geom, angle, power::Tuple, nrays::Integer)
-    Source(geom, angle, SVector{length(power), Float64}(power...), nrays)
+    Source(geom, angle, SA.SVector{length(power), Float64}(power...), nrays)
 end
 
 """

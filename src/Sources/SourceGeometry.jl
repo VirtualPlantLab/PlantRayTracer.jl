@@ -21,7 +21,7 @@ julia> source_geom = PointSource(PG.Vec(1.0, 1.0, 1.0));
 ```
 """
 struct PointSource{FT} <: SourceGeometry
-    loc::Vec{FT}
+    loc::PGP.Vec{FT}
 end
 
 generate_point(g::PointSource, rng) = g.loc
@@ -41,8 +41,8 @@ julia> source_geom = LineSource(PG.Vec(1.0, 1.0, 1.0), PG.Y());
 ```
 """
 struct LineSource{FT} <: SourceGeometry
-    p::Vec{FT}
-    line::Vec{FT} # not an unit vector!
+    p::PGP.Vec{FT}
+    line::PGP.Vec{FT} # not an unit vector!
 end
 
 function generate_point(g::LineSource{FT}, rng) where {FT}
@@ -51,7 +51,7 @@ end
 
 struct AreaSource{FT} <: SourceGeometry
     tvec::Vector{Triangle{FT}}
-    areas::Weights{FT, FT, Vector{FT}}
+    areas::StatsBase.Weights{FT, FT, Vector{FT}}
 end
 
 """
@@ -68,10 +68,10 @@ julia> e = Ellipse();
 julia> source_geom = AreaSource(e);
 ```
 """
-AreaSource(mesh::Mesh) = AreaSource(Triangle(mesh), Weights(areas(mesh)))
+AreaSource(mesh::PGP.Mesh) = AreaSource(Triangle(mesh), StatsBase.Weights(PGP.areas(mesh)))
 
 # Select randomly the triangle within the mesh and select randomly a point within the triangle
 function generate_point(g::AreaSource, rng)
-    t = sample(rng, g.tvec, g.areas)
+    t = StatsBase.sample(rng, g.tvec, g.areas)
     generate_point(t, rng)
 end

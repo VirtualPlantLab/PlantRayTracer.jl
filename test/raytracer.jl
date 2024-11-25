@@ -171,7 +171,7 @@ let
     for i in 1:3)
     translate!(rect2, Z())
     translate!(rect3, 2.0 * Z())
-    rectangles = Mesh([rect1, rect2, rect3])
+    rectangles = PGP.Mesh([rect1, rect2, rect3])
     mats = [Sensor() for _ in 1:3]
     ext_mats = mats[[1,1,2,2,3,3]]
     #ids = [1, 1, 2, 2, 3, 3]
@@ -193,10 +193,6 @@ let
     @test all(pow_abs .≈ pow_gen)
     @test all(pow_abs ./ area(rect1) .≈ radiosity)
 
-    # render(rectangles)
-    # render!(source)
-    # render!(rtobj.scene.grid)
-
     # Intersection of a rectangle from a directional light source at an angle
     source = DirectionalSource(gbox,
         θ = π / 4,
@@ -213,10 +209,6 @@ let
     @test all(pow_abs .≈ pow_gen)
     @test all(pow_abs ./ area(rect1) .≈ radiosity .* cos.(π/4))
 
-    # render(rectangles)
-    # render!(source)
-    # render!(rtobj.scene.grid)
-
     ##### Using Lambertian #####
 
     # Intersection of a rectangle from a directional light source downwards
@@ -229,7 +221,7 @@ let
     end for i in 1:3)
     translate!(rect2, Z())
     translate!(rect3, 2.0 * Z())
-    rectangles = Mesh([rect1, rect2, rect3])
+    rectangles = PGP.Mesh([rect1, rect2, rect3])
     mats = [Lambertian(τ = 0.3, ρ = 0.3) for i in 1:3]
     ext_mats = mats[[1, 1, 2, 2, 3, 3]]
     scene = Scene(mesh = rectangles, materials = ext_mats)
@@ -287,9 +279,6 @@ let
     RTirr = mat.power[1] ./ area(rect)
     @test RTirr ≈ radiosity
 
-    # render(rect)
-    # render!([source])
-
     ##### Test intersection code of specific rays with BVH acc + grid cloner #####
 
     # Intersection of a rectangle from a directional light source downwards (black)
@@ -325,7 +314,7 @@ let
                                   for i in 1:3)
     translate!(rect2, Z())
     translate!(rect3, 2.0 * Z())
-    rectangles = Mesh([rect1, rect2, rect3])
+    rectangles = PGP.Mesh([rect1, rect2, rect3])
     mats = [Sensor() for i in 1:3]
     ext_mats = mats[[1, 1, 2, 2, 3, 3]]
     scene = Scene(mesh = rectangles, materials = ext_mats)
@@ -362,7 +351,7 @@ let
                                   for i in 1:3)
     translate!(rect2, Z())
     translate!(rect3, 2.0 * Z())
-    rectangles = Mesh([rect1, rect2, rect3])
+    rectangles = PGP.Mesh([rect1, rect2, rect3])
     mats = [Lambertian(τ = 0.3, ρ = 0.3) for i in 1:3]
     ex_mats = mats[[1, 1, 2, 2, 3, 3]]
     scene = Scene(mesh = rectangles, materials = ex_mats)
@@ -462,15 +451,13 @@ let
     translate!(r2, Vec(0.0, 0.0, -1.0))
     mats = [Black(), Black()]
     ex_mats = mats[[1, 1, 2, 2]]
-    scene = Scene(mesh = Mesh([r, r2]), materials = ex_mats)
+    scene = Scene(mesh = PGP.Mesh([r, r2]), materials = ex_mats)
     sources = DirectionalSource(scene,
         θ = π / 2 * 0.99,
         Φ = 0.0,
         radiosity = cos(π / 2 * 0.99),
         nrays = nrays)
     power_out = sources.power * sources.nrays
-    #render(Mesh([r,r2]))
-    #render!(sources)
     settings = RTSettings(nx = 15, ny = 15, dx = 2.0, dy = 1.0, parallel = true)
     rtobj = RayTracer(scene, sources, settings = settings)
     nrays_traced, _ = trace!(rtobj)

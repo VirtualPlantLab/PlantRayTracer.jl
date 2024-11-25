@@ -76,10 +76,10 @@ julia> sc = Scene(mesh = Ellipse());
 julia> acc = accelerate(sc);
 ```
 """
-function accelerate(scene::Scene; settings = RTSettings(), acceleration = Naive,
+function accelerate(scene::PGP.Scene; settings = RTSettings(), acceleration = Naive,
     rule = nothing)
     triangles = Triangle(scene)
-    acc = acceleration(triangles, material_ids(scene), rule)
+    acc = acceleration(triangles, PGP.material_ids(scene), rule)
     grid = GridCloner(acc; nx = settings.nx, ny = settings.ny, dx = settings.dx,
         dy = settings.dy)
     AccScene(acc, grid)
@@ -122,7 +122,7 @@ julia> sources = (DirectionalSource(sc, θ = 0.0, Φ = 0.0, radiosity = 1.0, nra
 julia> rt = RayTracer(sc, sources);
 ```
 """
-function RayTracer(scene::Scene, sources; settings = RTSettings(),
+function RayTracer(scene::PGP.Scene, sources; settings = RTSettings(),
     acceleration = Naive, rule = nothing)
     # Construct the acceleration structure and grid cloner around the scene
     acc_scene = accelerate(scene, settings = settings, acceleration = acceleration,
@@ -131,10 +131,10 @@ function RayTracer(scene::Scene, sources; settings = RTSettings(),
     acc_scene.grid.nleaves == 1 && any(source.geom isa Directional for source in sources) &&
     settings.verbose &&
         println("Using Directional sources in the absence of a grid cloner may lead to incorrect results. See VPL documentation for details.")
-    RayTracer(acc_scene, materials(scene), sources, settings)
+    RayTracer(acc_scene, PGP.materials(scene), sources, settings)
 end
 
-function RayTracer(scene::Scene, source::Source; kwargs...)
+function RayTracer(scene::PGP.Scene, source::Source; kwargs...)
     RayTracer(scene, (source,); kwargs...)
 end
 
@@ -249,21 +249,21 @@ function trace!(rt::RayTracer)
     # Run ray tracer across multiple threads
     if rt.settings.parallel
         # Each thread gets a deep copy of materials to avoid data races
-        #materials = [deepcopy(rt.materials) for _ in 1:nthreads()]
+        #materials = [deepcopy(rt.materials) for _ in 1:T.nthreads()]
         # Each thread gets a different pseudo-random number generator which seed depends on the original one
-        samplers = [deepcopy(rt.settings.sampler) for _ in 1:Threads.nthreads()]
-        for i in 1:Threads.nthreads()
+        samplers = [deepcopy(rt.settings.sampler) for _ in 1:T.nthreads()]
+        for i in 1:T.nthreads()
             Random.seed!(samplers[i], rand(rt.settings.sampler, UInt))
         end
         # Allocated primary rays evenly across threads
-        Δrays = div(total_rays, nthreads())
-        irays = collect(0:(nthreads() - 1)) .* Δrays .+ 1
-        erays = collect(1:nthreads()) .* Δrays
+        Δrays = div(total_rays, T.nthreads())
+        irays = collect(0:(T.nthreads() - 1)) .* Δrays .+ 1
+        erays = collect(1:T.nthreads()) .* Δrays
         erays[end] = total_rays
         # Loop over threads while updating materials and collecting total number of rays traced
-        net_rays_thread = zeros(Int, nthreads())
-        total_rays_thread = zeros(Int, nthreads())
-        @threads for i in 1:nthreads()
+        net_rays_thread = zeros(Int, T.nthreads())
+        total_rays_thread = zeros(Int, T.nthreads())
+        T.@threads for i in 1:T.nthreads()
             @inbounds net_rays_thread[i], total_rays_thread[i]  = trace_thread!(rt,
                 rt.materials,
                 #materials[i],
@@ -300,7 +300,7 @@ function trace_thread!(rt, materials, nrays, i_ray, e_ray, rng)
     tnodestack = Int[]
     dstack = FT[]
     tdstack = FT[]
-    power = MVector{nw, Float64}(Tuple(0.0 for _ in 1:nw))
+    power = SA.MVector{nw, Float64}(Tuple(0.0 for _ in 1:nw))
     for i in i_ray:e_ray
         r = generate_ray!(rt.sources, nrays, i, power, rng)
         temp = trace!(r,

@@ -7,24 +7,19 @@ using LinearAlgebra
 import Statistics: quantile, mean
 import Base: intersect, length
 import Random
-import Base.Threads: @threads, nthreads
-import Atomix: @atomic
+import Base.Threads as T
+import Atomix
 
 # External dependencies
-import StaticArrays: SVector,
-    SArray, SizedVector, SMatrix, @SVector, MVector, @MVector, SDiagonal
+import StaticArrays as SA
 import Unrolled: @unroll
-import CoordinateTransformations: compose, Translation, LinearMap, AbstractAffineMap
-import Rotations: RotX, RotY, RotZ
-import StatsBase: sample, Weights
-import ColorTypes: RGBA
+import CoordinateTransformations as CT
+import Rotations
+import StatsBase
 
 # VPL dependencies
 import PlantGeomPrimitives as PG
-import PlantGeomPrimitives: Vec, O, X, Y, Z, Mesh, areas,
-    ntriangles, Ellipse, rotate!, translate!, BBox,
-    Scene, vertices, mesh, normals, material_ids, materials,
-    Material, add!, update_normals!
+import PlantGeomPrimitives as PGP
 
 # Raytracing API
 export RayTracer, RTSettings, trace!, Naive, accelerate, Directional,
@@ -59,7 +54,7 @@ include("RayTracer/RayTracer.jl")
 #     # Simple ray construction (check FT)
 #     for FT in (Float32, Float64)
 #         o = O(FT)
-#         dir = .-Z(FT)
+#         dir = .-PGP.Z(FT)
 #         r = Ray(o, dir)
 #     end
 #     # Simple Triangle construction (check FT)
@@ -72,7 +67,7 @@ include("RayTracer/RayTracer.jl")
 
 #     # Simple AABB construction (check FT)
 #     for FT in (Float32, Float64)
-#         t = Triangle(Z(FT), X(FT), Y(FT))
+#         t = Triangle(PGP.Z(FT), X(FT), Y(FT))
 #         a = AABB(t)
 #         longest(a)
 #         base_area(a)
@@ -84,35 +79,35 @@ include("RayTracer/RayTracer.jl")
 
 #     # Ray triangle intersection
 #     for FT in (Float32, Float64)
-#         r = Ray(Vec(FT(0.1), FT(0.1), FT(1)), .-Z(FT))
-#         t = Triangle(Vec(FT(0), FT(0), FT(0.5)), Vec(FT(1), FT(0), FT(0.5)), Vec(FT(0), FT(1), FT(0.5)))
+#         r = Ray(PGP.Vec(FT(0.1), FT(0.1), FT(1)), .-PGP.Z(FT))
+#         t = Triangle(PGP.Vec(FT(0), FT(0), FT(0.5)), PGP.Vec(FT(1), FT(0), FT(0.5)), PGP.Vec(FT(0), FT(1), FT(0.5)))
 #         i = intersect(r, t)
 #     end
 
 #     # Ray AABB intersection
 #     for FT in (Float32, Float64)
-#         r = Ray(Vec(FT(0.1), FT(0.1), FT(1)), .-Z(FT))
-#         a = AABB(Vec(FT(0), FT(0), FT(0)), Vec(FT(1), FT(1), FT(1)))
+#         r = Ray(PGP.Vec(FT(0.1), FT(0.1), FT(1)), .-PGP.Z(FT))
+#         a = AABB(PGP.Vec(FT(0), FT(0), FT(0)), PGP.Vec(FT(1), FT(1), FT(1)))
 #         i = intersect(r, a)
 #     end
 
 #     # AABB around vector of triangles
 #     for FT in (Float32, Float64)
-#         ta = Triangle(Vec(FT(0), FT(0), FT(0.5)), Vec(FT(1), FT(0), FT(0.5)), Vec(FT(0), FT(1), FT(0.5)))
-#         tb = Triangle(Vec(FT(1), FT(0), FT(0.5)), Vec(FT(0), FT(1), FT(0.5)), Vec(FT(-1), FT(0), FT(0.5)))
+#         ta = Triangle(PGP.Vec(FT(0), FT(0), FT(0.5)), PGP.Vec(FT(1), FT(0), FT(0.5)), PGP.Vec(FT(0), FT(1), FT(0.5)))
+#         tb = Triangle(PGP.Vec(FT(1), FT(0), FT(0.5)), PGP.Vec(FT(0), FT(1), FT(0.5)), PGP.Vec(FT(-1), FT(0), FT(0.5)))
 #         a = AABB([ta, tb])
 #         aabb = AABB(AABB(ta), AABB(tb))
 #     end
 
 #     # Point source
 #     for FT in (Float32, Float64)
-#         source = PointSource(Vec(FT(0), FT(0), FT(1)))
+#         source = PointSource(PGP.Vec(FT(0), FT(0), FT(1)))
 #         generate_point(source, rng)
 #     end
 
 #     # Line source
 #     for FT in (Float32, Float64)
-#         source = LineSource(Vec(FT(0), FT(0), FT(1)), X(FT))
+#         source = LineSource(PGP.Vec(FT(0), FT(0), FT(1)), X(FT))
 #         p = generate_point(source, rng)
 #     end
 
@@ -131,13 +126,13 @@ include("RayTracer/RayTracer.jl")
 
 #     # Lambertian source
 #     for FT in (Float32, Float64)
-#         source = LambertianSource(X(FT), Y(FT), Z(FT))
+#         source = LambertianSource(X(FT), Y(FT), PGP.Z(FT))
 #         generate_direction(source, rng)
 #     end
 
 #     # Point + fixed light source up to 5 wavelengths
 #     for FT in (Float32, Float64)
-#         geom = PointSource(Vec(FT(0), FT(0), FT(1)))
+#         geom = PointSource(PGP.Vec(FT(0), FT(0), FT(1)))
 #         angle = FixedSource(FT(0), FT(0))
 #         for i in 1:5
 #             source = Source(geom, angle, Tuple(ones(i)), 1_000)
@@ -150,8 +145,8 @@ include("RayTracer/RayTracer.jl")
 #     # Point + fixed light source up to 5 wavelengths
 #     for FT in (Float32, Float64)
 #         for i in 1:5
-#             gbox = AABB(O(FT), Vec(FT(1), FT(1), FT(1)))
-#             rad = SVector{i, Float64}(ones(i)...)
+#             gbox = AABB(O(FT), PGP.Vec(FT(1), FT(1), FT(1)))
+#             rad = SA.SVector{i, Float64}(ones(i)...)
 #             source = DirectionalSource(gbox, θ = FT(0), Φ = FT(0), radiosity = rad, nrays = 1_000)
 #             generate_point(source, rng)
 #             generate_direction(source, rng)
