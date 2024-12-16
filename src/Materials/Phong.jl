@@ -4,7 +4,7 @@
 #=
   Modified Phong model taken from Lafortune & Willems (1994)
 =#
-struct Phong{nw} <: PGP.Material
+struct Phong{nw} <: Material
     power::SA.MVector{nw, Float64}
     τ::SA.SVector{nw, Float64} # Transmittance
     ρd::SA.SVector{nw, Float64} # Diffuse reflectivity

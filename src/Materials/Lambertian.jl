@@ -5,7 +5,7 @@
   General material that assumes Lambertian transmittance and a combination
 of Lambertian and Phong reflectance
 =#
-struct Lambertian{nw} <: PGP.Material
+struct Lambertian{nw} <: Material
     power::SA.MVector{nw, Float64}
     τ::SA.SVector{nw, Float64}
     ρ::SA.SVector{nw, Float64}

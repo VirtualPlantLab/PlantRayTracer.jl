@@ -23,16 +23,16 @@ end
 end
 
 # Test ray tracing of tiles
-@testset "Ray tracing scenes" begin
+@testset "Ray tracing tiles" begin
     include("raytracer_tiles.jl")
 end
 
 # Test ray tracing of scenes
-@testset "Ray tracing scenes" begin
-    include("raytracer.jl")
+@testset "Ray tracing graphs" begin
+    include("test_graphs.jl")
 end
 
 # Test shade clothes and profiles of radiation
 @testset "Shade nets" begin
-    include("shade_net.jl")
+    include("test_shade_net.jl")
 end

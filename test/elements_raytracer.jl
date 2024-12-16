@@ -284,7 +284,7 @@ let
 
     # Lambertian material
     mat = RT.Lambertian(τ = 0.0, ρ = 0.3)
-    @test mat isa PGP.Material
+    @test mat isa Material
     @test length(power(mat)) == 1
     @test all(power(mat) .== zeros(1))
     source_power = [1.0]
@@ -296,7 +296,7 @@ let
     @test all(power(mat) .== [0.0])
 
     mat = RT.Lambertian(τ = 0.3, ρ = 0.0)
-    @test mat isa PGP.Material
+    @test mat isa Material
     @test length(power(mat)) == 1
     source_power = [1.0]
     mode, coef = RT.choose_outcome(mat, source_power, rng)
@@ -304,7 +304,7 @@ let
     @test mode == :τ
 
     mat = RT.Lambertian(τ = 0.3, ρ = 0.7)
-    @test mat isa PGP.Material
+    @test mat isa Material
     @test length(power(mat)) == 1
     source_power = [1.0]
     mode, coef = RT.choose_outcome(mat, source_power, rng)
@@ -312,7 +312,7 @@ let
     @test mode == :ρ || mode == :τ
 
     mat = RT.Lambertian(τ = (0.0, 0.0), ρ = (0.3, 0.3))
-    @test mat isa PGP.Material
+    @test mat isa Material
     @test length(power(mat)) == 2
     @test all(power(mat) .== zeros(2))
     source_power = [1.0, 1.0]
@@ -325,7 +325,7 @@ let
     @test all(power(mat) .== zeros(2))
 
     mat = RT.Lambertian(τ = (0.3, 0.3), ρ = (0.0, 0.0))
-    @test mat isa PGP.Material
+    @test mat isa Material
     @test length(power(mat)) == 2
     source_power = [1.0, 1.0]
     mode, coef = RT.choose_outcome(mat, source_power, rng)
@@ -333,7 +333,7 @@ let
     @test mode == :τ
 
     mat = RT.Lambertian(τ = (0.3, 0.7), ρ = (0.7, 0.3))
-    @test mat isa PGP.Material
+    @test mat isa Material
     @test length(power(mat)) == 2
     source_power = [1.0, 1.0]
     mode, coef = RT.choose_outcome(mat, source_power, rng)
@@ -342,7 +342,7 @@ let
 
     # Phong material
     mat = RT.Phong(τ = 0.2, ρd = 0.3, ρsmax = 0.7, n = 2)
-    @test mat isa PGP.Material
+    @test mat isa Material
     mat = RT.Phong(τ = (0.2, 0.2), ρd = (0.3, 0.3), ρsmax = (0.7, 0.7), n = 2)
     @test length(mat.τ) == 2
 
@@ -370,6 +370,6 @@ let
     # Make sure normal vectors are not inverted!
     r = PGP.Rectangle()
     ts = RT.Triangle(r)
-    @test all(r.normals[1] .== ts[1].n)
-    @test all(r.normals[2] .== ts[2].n)
+    @test all(PGP.normals(r)[1] .== ts[1].n)
+    @test all(PGP.normals(r)[2] .== ts[2].n)
 end

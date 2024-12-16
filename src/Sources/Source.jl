@@ -65,9 +65,9 @@ Retrieve the number of wavelengths that rays from a source will contain.
 ```jldoctest
 julia> using PlantGeomPrimitives;
 
-julia> sc = Scene(mesh = Ellipse());
+julia> mesh = Ellipse();
 
-julia> source = DirectionalSource(sc, θ = 0.0, Φ = 0.0, radiosity = 1.0, nrays = 1_000);
+julia> source = DirectionalSource(mesh, θ = 0.0, Φ = 0.0, radiosity = 1.0, nrays = 1_000);
 
 julia> get_nw(source);
 ```

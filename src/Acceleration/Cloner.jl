@@ -115,7 +115,7 @@ function splitnode(grid::GridCloner, parentbox, indices, scene)
         maximum(centers[:, 3]) - minimum(centers[:, 3]))
     index = findmax(distances)[2]
     # Split along the chosen axis (arithmetic mean is good enough for TNODEs)
-    pos = mean(centers[:, index])
+    pos = Statistics.mean(centers[:, index])
     # Distribute the nodes according to position of centers relative to pos
     leftindices = indices[centers[:, index] .< pos]
     rightindices = setdiff(indices, leftindices)
