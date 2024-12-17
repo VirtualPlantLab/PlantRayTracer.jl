@@ -86,29 +86,12 @@ function Triangle(mesh::PGP.Mesh{VT}) where {VT}
     return output
 end
 
-"""
-    Triangle(scene::Scene)
-
-Create a vector of ray tracing `Triangle` objects from a `Scene` object.
-
-## Examples
-```jldoctest
-julia> using PlantGeomPrimitives;
-
-julia> sc = Scene(mesh = Ellipse());
-
-julia> t = PlantRayTracer.Triangle(sc);
-```
-"""
-function Triangle(scene::PGP.Scene)
-    Triangle(PGP.mesh(scene))
-end
 
 # Moller-Trumbore intersection test with early exits
 # Returns intersection_test (T/F), intersection_distance, front (T/F)
 # The front of the triangle is simply the side the normal uVec points to
 # Note: This will fail when the ray hits exactly on the border of the triangle
-function intersect(ray::Ray{FT}, t::Triangle{FT}) where {FT}
+function Base.intersect(ray::Ray{FT}, t::Triangle{FT}) where {FT}
     # Check if the ray intercepts the plane containing the triangle
     pvec = ray.dir × t.e2
     det = t.e1 ⋅ pvec

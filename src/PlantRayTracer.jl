@@ -4,8 +4,8 @@ using PrecompileTools
 
 # Dependencies from Julia's standard library
 using LinearAlgebra
-import Statistics: quantile, mean
-import Base: intersect, length
+import Statistics
+import Base
 import Random
 import Base.Threads as T
 import Atomix
@@ -22,7 +22,7 @@ import PlantGeomPrimitives as PG
 import PlantGeomPrimitives as PGP
 
 # Raytracing API
-export RayTracer, RTSettings, trace!, Naive, accelerate, Directional,
+export RayTracer, RTSettings, trace!, Naive, accelerate, Directional, materials, Material,
     Source, LambertianSource, DirectionalSource, PointSource, LineSource, AreaSource, TwoSidedSensor,
     tau, rho, Lambertian, Phong, Sensor, Black,
     get_nw, FixedSource, reset!, power, BVH, SAH, AvgSplit

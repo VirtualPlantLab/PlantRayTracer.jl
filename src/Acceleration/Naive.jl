@@ -31,13 +31,13 @@ julia> ids  = repeat([1], length(tris));
 julia> Naive(tris, ids);
 ```
 """
-function Naive(triangles, ids, rule = nothing)
+function Naive(triangles::Vector{<:Triangle}, ids::Vector{Int}, rule = nothing)
     gbox = AABB(triangles)
     Naive(gbox, triangles, ids)
 end
 
 # Return closest hit (if any)
-function intersect(ray::Ray{FT}, acc::Naive, nodestack, dstack, dmin) where {FT}
+function Base.intersect(ray::Ray{FT}, acc::Naive, nodestack, dstack, dmin) where {FT}
     @inbounds begin
         #dmin = Inf
         frontmin = true

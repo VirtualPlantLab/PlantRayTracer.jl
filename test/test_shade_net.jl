@@ -25,7 +25,10 @@ module Tiles
         mat::Sensor{1} = Sensor(1)
     end
 end
+
+let
 import .Tiles
+
 
 function PGT.feed!(turtle::PGT.Turtle, tile::Tiles.Tile, data)
     PGT.t!(turtle, to = PGP.Vec(0.0, 0.0, tile.height))
@@ -46,20 +49,14 @@ function PGT.feed!(turtle::PGT.Turtle, sensor::Tiles.LightSensor, data)
     return nothing
 end
 
-
-let
-
 # Create the shade cloth and soil tile
 axiom = PGT.RA(90.0)
 for i in 1:2:20
     axiom += Tiles.Shade(height = Float64(i)) + Tiles.LightSensor(height = Float64(i + 1))
 end
 g     = PG.Graph(axiom = axiom);
-scene = PGP.Scene(g);
-PGP.colors(scene)
-PGP.vertices(scene)
+scene = PGP.Mesh(g);
 #PV.render(scene, normals = true)
-
 
 # Run ray tracer
 settings = PRT.RTSettings(pkill = 0.9, maxiter = 10, nx = 10, ny = 10, parallel = true)

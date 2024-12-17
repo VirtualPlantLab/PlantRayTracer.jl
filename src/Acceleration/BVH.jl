@@ -285,7 +285,7 @@ end
 function split_box(rule::SAH{K}, scenters, i) where {K}
     axis = div(i - 1, K) + 1
     iax = i - (axis - 1) * K
-    pos = quantile(scenters[axis], iax / (K + 1), sorted = true)
+    pos = Statistics.quantile(scenters[axis], iax / (K + 1), sorted = true)
     return axis, pos
 end
 

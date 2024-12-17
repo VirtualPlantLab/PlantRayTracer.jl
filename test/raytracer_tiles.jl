@@ -41,8 +41,9 @@ let
     # Construct the tile with N triangles
     function PGT.feed!(turtle::PGT.Turtle, tile::Tiles.Tile{N, M}, data) where {N, M}
         for _ in 1:N
-            PGP.Rectangle!(turtle, length = tile.length / N, width = tile.length,
-                materials = tile.mat[1], colors = rand(RGB), move = true)
+            col = rand(RGB)
+            PGP.Rectangle!(turtle, length = tile.length / N, width = tile.length, move = true,
+                materials = [tile.mat[1] for _ in 1:2], colors = [col for _ in 1:2])
         end
         return nothing
     end
@@ -52,27 +53,14 @@ let
     psettings = PRT.RTSettings(pkill = 0.3, maxiter = 3, nx = 3, ny = 3, parallel = true)
 
     # Create the ray tracing scene and run it
-    function ray_trace!(scene,
-        settings,
-        acceleration = PRT.Naive;
-        radiosity = 1.0,
-        nrays = 1000, θ = 0.0)
-         source = PRT.DirectionalSource(scene,
-            θ = θ,
-            Φ = 0.0,
-            radiosity = radiosity,
-            nrays = nrays)
+    function ray_trace!(scene, settings, acceleration = PRT.Naive; radiosity = 1.0,
+                        nrays = 1000, θ = 0.0)
+        source = PRT.DirectionalSource(scene, θ = θ, Φ = 0.0, radiosity = radiosity, nrays = nrays)
         if acceleration == PRT.Naive
-            rtobj = PRT.RayTracer(scene,
-                source,
-                settings = settings,
-                acceleration = acceleration)
+            rtobj = PRT.RayTracer(scene, source, settings = settings, acceleration = acceleration)
         else
-            rtobj = PRT.RayTracer(scene,
-                source,
-                settings = settings,
-                acceleration = PRT.BVH,
-                rule = PRT.SAH{1}(2, 5))
+            rtobj = PRT.RayTracer(scene, source, settings = settings, acceleration = PRT.BVH,
+                                  rule = PRT.SAH{1}(2, 5))
         end
         nrays = PRT.trace!(rtobj)
         return nothing
@@ -93,7 +81,7 @@ let
     nrays = 1_000
     axiom = PGT.RA(90.0) + Tiles.Tile{N, nw}(L, [PRT.Lambertian(τ = 0.1, ρ = 0.2)])
     graph = PG.Graph(axiom = axiom)
-    scene = PGP.Scene(graph)
+    scene = PGP.Mesh(graph)
     #render(scene)
 
     # Naive + Serial
@@ -129,7 +117,7 @@ let
     nrays = 1_000
     axiom = PGT.RA(90.0) + PGT.RH(60.0) + Tiles.Tile{N, nw}(L, [PRT.Lambertian(τ = 1e-6, ρ = 1e-6)])
     graph = PG.Graph(axiom = axiom)
-    scene = PGP.Scene(graph)
+    scene = PGP.Mesh(graph)
     #render(scene)
     θ = π/3
     ray_trace!(scene, psettings, PRT.BVH, radiosity = radiosity*cos(θ), nrays = nrays, θ = θ)
@@ -147,7 +135,7 @@ let
     nrays = 1_000
     axiom = PGT.RA(90.0) + Tiles.Tile{N, nw}(L, [PRT.Lambertian(τ = 0.1, ρ = 0.2)])
     graph = PG.Graph(axiom = axiom)
-    scene = PGP.Scene(graph)
+    scene = PGP.Mesh(graph)
     #render_scene(scene)
 
     # Naive + Serial
@@ -184,7 +172,7 @@ let
     axiom = PGT.RA(90.0) +
             Tiles.Tile{N, nw}(L, [PRT.Lambertian(τ = (0.1, 0.1), ρ = (0.2, 0.2))])
     graph = PG.Graph(axiom = axiom)
-    scene = PGP.Scene(graph)
+    scene = PGP.Mesh(graph)
     #render_scene(scene)
 
     # Naive + Serial
@@ -221,7 +209,7 @@ let
     make_tile() = Tiles.Tile{N, nw}(L, [PRT.Lambertian(τ = 0.1, ρ = 0.2)])
     axiom = PGT.RA(90.0) + make_tile() + make_tile()
     graph = PG.Graph(axiom = axiom)
-    scene = PGP.Scene(graph)
+    scene = PGP.Mesh(graph)
     #render_scene(scene)
 
     # Naive + Serial
@@ -259,7 +247,7 @@ let
     make_tile() = Tiles.Tile{N, nw}(L, [PRT.Lambertian(τ = (0.1, 0.1), ρ = (0.2, 0.2))])
     axiom = PGT.RA(90.0) + make_tile() + make_tile()
     graph = PG.Graph(axiom = axiom)
-    scene = PGP.Scene(graph)
+    scene = PGP.Mesh(graph)
     #render_scene(scene)
 
     # Naive + Serial
@@ -296,11 +284,11 @@ let
     nrays = 1_000_000
     make_tile() = Tiles.Tile{N, nw}(L, [PRT.Lambertian(τ = (0.1, 0.1), ρ = (0.2, 0.2))])
     axiom1 = PGT.RA(90.0) + make_tile() + make_tile()
-    graph1 = PG.Graph(axiom = axiom)
+    graph1 = PG.Graph(axiom = axiom1)
     axiom2 = PGT.RA(90.0) + PGT.F(2.0) + make_tile() + make_tile()
     graph2 = PG.Graph(axiom = axiom2)
-    scene = PGP.Scene([graph1, graph2])
-    #render_scene(scene)
+    scene = PGP.Mesh([graph1, graph2])
+    # #render_scene(scene)
 
     # Naive + Serial
     ray_trace!(scene, settings, PRT.Naive, radiosity = radiosity, nrays = nrays)
@@ -349,10 +337,10 @@ let
     graph1 = PG.Graph(axiom = axiom1)
     axiom2 = PGT.RA(90.0) + PGT.F(2.0) + make_tile() + make_tile()
     graph2 = PG.Graph(axiom = axiom2)
-    scene = PGP.Scene(graph1)
-    scene_extra = PGP.Scene(graph2)
+    scene = PGP.Mesh(graph1)
+    scene_extra = PGP.Mesh(graph2)
     mat = PRT.Lambertian(τ = (0.1, 0.1), ρ = (0.2, 0.2))
-    PGP.add!(scene, mesh = scene_extra.mesh, materials = mat, colors = rand(RGB))
+    PGP.add!(scene, scene_extra, materials = mat, colors = rand(RGB))
     #render_scene(scene)
 
     # Naive + Serial
@@ -360,7 +348,7 @@ let
     pow, irradiance = get_power(graph1, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7)
     pow = sum(mat.power)
-    irradiance = pow / PGP.area(scene_extra.mesh)
+    irradiance = pow / PGP.area(scene_extra)
     test_results(irradiance, sum(radiosity) * 0.7)
 
     # Naive + Parallel
@@ -368,7 +356,7 @@ let
     pow, irradiance = get_power(graph1, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7)
     pow = sum(mat.power)
-    irradiance = pow / PGP.area(scene_extra.mesh)
+    irradiance = pow / PGP.area(scene_extra)
     test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Serial
@@ -376,7 +364,7 @@ let
     pow, irradiance = get_power(graph1, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7)
     pow = sum(mat.power)
-    irradiance = pow / PGP.area(scene_extra.mesh)
+    irradiance = pow / PGP.area(scene_extra)
     test_results(irradiance, sum(radiosity) * 0.7)
 
     # BVH + Parallel
@@ -384,7 +372,7 @@ let
     pow, irradiance = get_power(graph1, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7)
     pow = sum(mat.power)
-    irradiance = pow / PGP.area(scene_extra.mesh)
+    irradiance = pow / PGP.area(scene_extra)
     test_results(irradiance, sum(radiosity) * 0.7)
 
     # Source is at an angle
@@ -393,6 +381,6 @@ let
     pow, irradiance = get_power(graph1, N, nw)
     test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
     pow = sum(mat.power)
-    irradiance = pow / PGP.area(scene_extra.mesh)
+    irradiance = pow / PGP.area(scene_extra)
     test_results(irradiance, sum(radiosity) * 0.7 * cos(θ))
 end

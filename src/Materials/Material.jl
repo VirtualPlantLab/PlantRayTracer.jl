@@ -11,6 +11,14 @@
 # To avoid type instability propagating throughout the code, all these functions
 # should return tuples of the same type
 
+# Abstract type for materials
+abstract type Material end
+
+# Access materials from a mesh
+function materials(mesh::PGP.Mesh)
+    return PGP.properties(mesh)[:materials]
+end
+
 # Implementations of different types of materials
 include("Lambertian.jl")
 include("Phong.jl")
@@ -34,11 +42,11 @@ julia> reset!(l);
 julia> l;
 ```
 """
-function reset!(material::PGP.Material)
+function reset!(material::Material)
     material.power .= 0.0
     return nothing
 end
-function reset!(materials::Vector{<:PGP.Material})
+function reset!(materials::Vector{<:Material})
     T.@threads for mat in materials
         reset!(mat)
     end
@@ -56,6 +64,6 @@ julia> l = Lambertian(τ = 0.1, ρ = 0.2);
 julia> power(l);
 ```
 """
-function power(mat::PGP.Material)
+function power(mat::Material)
     mat.power
 end

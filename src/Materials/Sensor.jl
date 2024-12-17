@@ -5,7 +5,7 @@
   Material that has no effect on the ray and its associated power but accumulates
 all the power associated to the ray
 =#
-struct Sensor{nw} <: PGP.Material
+struct Sensor{nw} <: Material
     power::SA.MVector{nw, Float64}
 end
 

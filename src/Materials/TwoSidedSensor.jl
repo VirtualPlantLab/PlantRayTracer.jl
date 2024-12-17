@@ -5,7 +5,7 @@
   Material that has no effect on the ray and its associated power but accumulates
 the power associated to rays hitting on the front and back side
 =#
-struct TwoSidedSensor{nw} <: PGP.Material
+struct TwoSidedSensor{nw} <: Material
     power_front::SA.MVector{nw, Float64}
     power_back::SA.MVector{nw, Float64}
 end

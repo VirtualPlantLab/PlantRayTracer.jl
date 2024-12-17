@@ -141,7 +141,7 @@ end
 base_area(box::AABB) = (box.max[1] - box.min[1]) * (box.max[2] - box.min[2])
 
 # Fit a box to a 3D scene
-function AABB(scene::PGP.Scene)
+function AABB(scene::PGP.Mesh{FT}) where {FT}
     xmin = Inf
     ymin = Inf
     zmin = Inf
@@ -156,5 +156,7 @@ function AABB(scene::PGP.Scene)
         ymax = max(ymax, vertex[2])
         zmax = max(zmax, vertex[3])
     end
-    AABB(PGP.Vec(xmin, ymin, zmin), PGP.Vec(xmax, ymax, zmax))
+    # Add a small margin to the box to avoid floating point errors
+    mx = PGP.Vec(xmax, ymax, zmax) .+ PGP.Vec(10 * eps(FT) for i in 1:3)
+    AABB(PGP.Vec(xmin, ymin, zmin), mx)
 end
