@@ -14,7 +14,29 @@
 # Abstract type for materials
 abstract type Material end
 
-# Access materials from a mesh
+"""
+    materials(mesh::PGP.Mesh)
+
+Extract the materials properties from a given mesh.
+
+# Arguments
+- `mesh::PGP.Mesh`: The mesh object from which to extract material properties.
+
+# Returns
+- A dictionary containing the material properties of the mesh.
+
+# Examples
+```jldoctest
+
+julia> using PlantGeomPrimitives;
+
+julia> r = Rectangle();
+
+julia> add_property!(r, :materials, Lambertian(τ = 0.1, ρ = 0.2));
+
+julia> materials(r);
+```
+"""
 function materials(mesh::PGP.Mesh)
     return PGP.properties(mesh)[:materials]
 end
