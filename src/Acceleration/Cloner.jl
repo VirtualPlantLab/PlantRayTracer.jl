@@ -15,13 +15,17 @@ end
 TNODE(box::AABB{FT}, leaf) where {FT} = TNODE(box, leaf, PGP.Vec{FT}(0, 0, 0))
 
 # Structure that contains the binary tree required to traverse the grid cloner
+# We store dx, dy and dz so that it can be used by other algorithms like sky domes
 struct GridCloner{FT}
     nodes::GVector{TNODE{FT}}
     nleaves::Int
+    dx::Float64
+    dy::Float64
+    dz::Float64
 end
 
 # Create a grid cloner around an acceleration structure
-# Create (2*n + 1) clones in each x or y direction -> symmetry enforced by odd numbers
+# Create (2*n + 1) clones in each direction -> symmetry enforced by odd numbers
 # Create n in z direction (always go up)
 function GridCloner(acc::Acceleration{FT}; nx = 3, ny = 3, nz = 0,
     dx = nothing, dy = nothing, dz = nothing) where {FT}
@@ -34,12 +38,13 @@ function GridCloner(acc::Acceleration{FT}; nx = 3, ny = 3, nz = 0,
     gbox = acc.gbox
     isempty(acc.gbox) ||
         nx == ny == nz == 0 &&
-            (return GridCloner(GVector([TNODE(gbox, true, PGP.Vec{FT}(0, 0, 0))]), 1))
+            (return GridCloner(GVector([TNODE(gbox, true, PGP.Vec{FT}(0, 0, 0))]),
+                               1, 0.0, 0.0, 0.0))
     # Create all the leaf TNODES, their centers and indices
     scene = create_tnodes(nx, ny, nz, dx, dy, dz, gbox)
     indices = collect(1:length(scene.nodes))
     # Create empty grid structure with the two arrays
-    grid = GridCloner(GVector(TNODE{FT}[]), length(scene.nodes))
+    grid = GridCloner(GVector(TNODE{FT}[]), length(scene.nodes), dx, dy, dz)
     # Call the recusive function to add (packets of) nodes and triangles
     parentbox = AABB(scene.boxes, indices)
     addNode!(grid, scene, parentbox, 0, indices)
