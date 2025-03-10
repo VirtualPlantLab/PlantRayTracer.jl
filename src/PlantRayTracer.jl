@@ -22,7 +22,7 @@ import PlantGeomPrimitives as PG
 import PlantGeomPrimitives as PGP
 
 # Raytracing API
-export RayTracer, RTSettings, trace!, Naive, accelerate, Directional, materials, Material,
+export RayTracer, RTSettings, trace!, Naive, accelerate, Directional, materials, has_materials, Material,
     Source, LambertianSource, DirectionalSource, PointSource, LineSource, AreaSource, TwoSidedSensor,
     tau, rho, Lambertian, Phong, Sensor, Black,
     get_nw, FixedSource, reset!, power, BVH, SAH, AvgSplit

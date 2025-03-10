@@ -41,6 +41,38 @@ function materials(mesh::PGP.Mesh)
     return PGP.properties(mesh)[:materials]
 end
 
+
+"""
+    has_materials(mesh::Mesh)
+
+Check if a mesh contains materials among its properties.
+
+# Arguments
+- `mesh`: The mesh object being tested,
+
+# Returns
+- A boolean (`true` or `false`)
+
+# Examples
+```jldoctest
+
+julia> using PlantGeomPrimitives;
+
+julia> r = Rectangle();
+
+julia> add_property!(r, :materials, Lambertian(τ = 0.1, ρ = 0.2));
+
+julia> has_materials(r);
+
+julia> r2 = Rectangle();
+
+julia> has_materials(r2);
+```
+"""
+function has_materials(mesh::PGP.Mesh)
+    :materials in keys(PGP.properties(mesh))
+end
+
 # Implementations of different types of materials
 include("Lambertian.jl")
 include("Phong.jl")
