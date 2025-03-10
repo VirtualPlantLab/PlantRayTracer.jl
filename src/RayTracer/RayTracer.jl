@@ -51,10 +51,11 @@ Base.@kwdef struct RTSettings{RNG, dt <: Union{Real, Nothing}}
     dz::dt = dy isa Nothing ? nothing : zero(dy)
 end
 
-# Wrap the acceleration structure and the grid cloner in a single object
-struct AccMesh{A, G}
+# Wrap the acceleration structure and the grid cloner in a single object (keep materials too)
+struct AccMesh{A, G, M}
     acc::A
     grid::G
+    materials::M
 end
 
 """
@@ -65,13 +66,15 @@ Create an `AccMesh` object from a mesh, settings and acceleration function
 accelerator `BVH` and it must be an object of type `SAH` or `AvgSplit`
 (it is ignored for the `Naive` accelerator). The `AccMesh` object contains
 the acceleration structure and the grid cloner structure built on top of the
-original 3D meshes in `mesh`. See VPL documentation for details.
+original 3D meshes in `mesh`, as well as the materials. See VPL documentation for details.
 
 ## Examples
 ```jldoctest
 julia> using PlantGeomPrimitives;
 
 julia> mesh = Ellipse();
+
+julia> add_property!(mesh, :materials, Black(1));
 
 julia> acc = accelerate(mesh);
 ```
@@ -82,8 +85,16 @@ function accelerate(mesh::PGP.Mesh; settings = RTSettings(), acceleration = Naiv
     acc = acceleration(triangles, collect(1:length(triangles)), rule)
     grid = GridCloner(acc; nx = settings.nx, ny = settings.ny, dx = settings.dx,
         dy = settings.dy)
-    AccMesh(acc, grid)
+    if has_materials(mesh)
+        mats = materials(mesh)
+    else
+        settings.verbose && println("Using accelerate on a mesh without materials. Make sure to add materials to the RayTracer object later on.")
+        mats = Material[]
+    end
+    AccMesh(acc, grid, mats)
 end
+
+materials(acc_mesh::AccMesh) = acc_mesh.materials
 
 """
     RayTracer(mesh, materials, sources, settings)
@@ -100,7 +111,7 @@ struct RayTracer{A, M, S, RT}
 end
 
 """
-    RayTracer(mesh, sources; settings = RTSettings(), acceleration = Naive, rule = nothing)
+    RayTracer(mesh::Mesh, sources; settings = RTSettings(), acceleration = Naive, rule = nothing)
 
 Create a `RayTracer` object from a mesh, a tuple of sources (objects that inherit from `Source`),
 or a single source, settings and acceleration function (choose from `Naive` or  `BVH`). The argument `rule` is only required for the
@@ -126,19 +137,63 @@ julia> sources = (DirectionalSource(mesh, θ = 0.0, Φ = 0.0, radiosity = 1.0, n
 julia> rt = RayTracer(mesh, sources);
 ```
 """
-function RayTracer(mesh::PGP.Mesh, sources; settings = RTSettings(),
-    acceleration = Naive, rule = nothing)
+function RayTracer(mesh::PGP.Mesh, sources; settings = RTSettings(), acceleration = Naive,
+                   rule = nothing)
+    # Check the right properties are included
+    @assert has_materials(mesh)
     # Construct the acceleration structure and grid cloner around the mesh
     acc_mesh = accelerate(mesh, settings = settings, acceleration = acceleration,
         rule = rule)
     # Check for use directional light sources in the absence of the grid cloner
     acc_mesh.grid.nleaves == 1 && any(source.geom isa Directional for source in sources) &&
     settings.verbose &&
-        println("Using Directional sources in the absence of a grid cloner may lead to incorrect results. See VPL documentation for details.")
+        println("Using Directional sources in the absence of a grid cloner may lead to incorrect results.")
     RayTracer(acc_mesh, materials(mesh), sources, settings)
 end
 
+"""
+    RayTracer(acc_mesh::AccMesh, sources; settings = RTSettings())
+
+Create a `RayTracer` object from an accelerated mesh, a tuple of sources (objects that
+inherit from `Source`), or a single source and settings. An accelerated mesh is created with
+the function `accelerate()`
+
+## Examples
+```jldoctest
+julia> using PlantGeomPrimitives;
+
+julia> mesh = Ellipse();
+
+julia> mat = Lambertian(τ = 0.1, ρ = 0.2);
+
+julia> add_property!(mesh, :materials, [mat for _ in 1:ntriangles(mesh)]);
+
+julia> source = DirectionalSource(mesh, θ = 0.0, Φ = 0.0, radiosity = 1.0, nrays = 1_000);
+
+julia> rt = RayTracer(mesh, source);
+
+julia> sources = (DirectionalSource(mesh, θ = 0.0, Φ = 0.0, radiosity = 1.0, nrays = 1_000),
+                  DirectionalSource(mesh, θ = 45.0, Φ = 0.0, radiosity = 1.0, nrays = 1_000));
+
+julia> acc_mesh = accelerate(mesh);
+
+julia> rt = RayTracer(acc_mesh, sources);
+```
+"""
+function RayTracer(acc_mesh::AccMesh, sources; settings = RTSettings())
+    # Check for use directional light sources in the absence of the grid cloner
+    acc_mesh.grid.nleaves == 1 && any(source.geom isa Directional for source in sources) &&
+    settings.verbose &&
+        println("Using Directional sources in the absence of a grid cloner may lead to incorrect results. See VPL documentation for details.")
+    RayTracer(acc_mesh, materials(acc_mesh), sources, settings)
+end
+
+# Wrapper for when we only pass one source (so users don't need to create a single item tuple)
 function RayTracer(mesh::PGP.Mesh, source::Source; kwargs...)
+    RayTracer(mesh, (source,); kwargs...)
+end
+
+function RayTracer(mesh::AccMesh, source::Source; kwargs...)
     RayTracer(mesh, (source,); kwargs...)
 end
 
