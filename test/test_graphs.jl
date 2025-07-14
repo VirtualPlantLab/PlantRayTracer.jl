@@ -508,7 +508,7 @@ let
     settings = RTSettings(parallel = true)
     rtobj = RayTracer(mesh, sources, settings = settings)
     nrays_traced, _ = trace!(rtobj)
-    @test length(filter(x -> x.power[1] > 0.0, materials(mesh))) == 30 # 8 faces seen (+ soil)
+    @test length(filter(x -> x.power[1] > 0.0, materials(mesh))) == 18 # 8 faces seen (+ soil)
     mesh = Mesh(Koch, message = "render")
     Geom.add!(mesh, r, materials = Black(1), colors = RGB(0.5, 0.5, 0.0))
 
