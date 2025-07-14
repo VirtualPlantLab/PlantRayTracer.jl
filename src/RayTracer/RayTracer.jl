@@ -340,7 +340,7 @@ function trace!(rt::RayTracer)
         end
         net_rays = sum(net_rays_thread)
         total_rays = sum(total_rays_thread)
-        # Run ray tracer in a single multiple thread
+    # Run ray tracer in a single thread
     else
         net_rays, total_rays = trace_thread!(rt,
             rt.materials,
