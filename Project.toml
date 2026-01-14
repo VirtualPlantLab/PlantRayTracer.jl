@@ -1,7 +1,7 @@
 name = "PlantRayTracer"
 uuid = "78485975-e4aa-407d-b3bb-ded5a4265d05"
 authors = ["Alejandro Morales Sierra <alejandro.moralessierra@wur.nl> and contributors"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Atomix = "a9b6321e-bd34-4604-b9c9-b65b8de01458"
@@ -20,7 +20,7 @@ Unrolled = "9602ed7d-8fef-5bc8-8597-8f21381861e8"
 Atomix = "1.1.2"
 CoordinateTransformations = "0.6.3"
 LinearAlgebra = "1.11"
-PlantGeomPrimitives = "0.1.0"
+PlantGeomPrimitives = "0.1.1"
 PrecompileTools = "1.3.3"
 Random = "1.11"
 Rotations = "1.5.1"

@@ -27,7 +27,6 @@ Extract the materials properties from a given mesh.
 
 # Examples
 ```jldoctest
-
 julia> using PlantGeomPrimitives;
 
 julia> r = Rectangle();
@@ -55,7 +54,6 @@ Check if a mesh contains materials among its properties.
 
 # Examples
 ```jldoctest
-
 julia> using PlantGeomPrimitives;
 
 julia> r = Rectangle();
