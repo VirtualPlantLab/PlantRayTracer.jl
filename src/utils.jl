@@ -53,17 +53,28 @@ function project(p, pp, pn)
     p .- dist .* pn
 end
 
-# Help write coordinate transformations
+# Help write coordinate transformations (CT = CoordinateTransformations.jl)
 translate(x, y, z) = CT.Translation(x, y, z)
 rotatex(x) = CT.LinearMap(Rotations.RotX(x))
 rotatey(x) = CT.LinearMap(Rotations.RotY(x))
 rotatez(x) = CT.LinearMap(Rotations.RotZ(x))
 
-# Given angles θ and Φ, calculate the flipped coordinate system of the plane
-# Φ clockwise looking against Z - East is positive
-# θ counterclock wise looking against Y - Sunrise is positive
-function rotate_coordinates(θ::FT, Φ::FT) where {FT}
-    rot = rotatez(-Φ) ∘ rotatex(-θ)
+#=
+ Given angles θ (solar zenith), Φ (solar azimuth), α (azimuth of X axis)
+ calculate the flipped coordinate system of the plane (i.e. a coordinate system
+ for rays generated from the sky towards the Earth)
+ By default we assume:
+ X axis points towards South (azimuth of pi radians)
+ Y axis points towards East (azimuth of pi/2 radians)
+ Z axis points towards zenith (away from ground)
+ Φ clockwise looking against Z - East is positive
+ θ counterclock wise - 0 = Zenith, Sunrise = pi/2
+ α is the angle between the X axis and the North-South axis (i.e. the azimuth of X axis)
+ For example: α = pi/2 means the X axis points towards East and Y axis points towards North
+ PGP = PlantGeomPrimtives.jl package (just generates unit vectors of a Cartesian system)
+=#
+function rotate_coordinates(θ::FT, Φ::FT, α = FT(π)) where {FT}
+    rot = rotatez(α - FT(π) - Φ) ∘ rotatey(-θ)
     (x = .-rot(PGP.X(FT)), y = .-rot(PGP.Y(FT)), z = .-rot(PGP.Z(FT)))
 end
 
