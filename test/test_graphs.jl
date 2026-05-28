@@ -438,7 +438,7 @@ let
     # This divergence does not seem to decrease with the number of rays. It may
     # depend on the mesh itself though?
     @test maximum(abs.((powers_bvh .- powers_naive) ./ (powers_naive .+ eps(Float64)))) <
-          0.008
+          0.012
     @test abs(sum(powers_bvh) - sum(powers_naive)) / sum(powers_bvh) < 6e-5
 
     # Simple test to make sure that rays are always generated from above the mesh

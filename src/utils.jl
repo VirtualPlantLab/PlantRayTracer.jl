@@ -60,7 +60,8 @@ rotatey(x) = CT.LinearMap(Rotations.RotY(x))
 rotatez(x) = CT.LinearMap(Rotations.RotZ(x))
 
 #=
- Given angles θ (solar zenith), Φ (solar azimuth), α (azimuth of X axis)
+ Given angles θ (solar zenith), Φ (solar azimuth), α (azimuth of X axis),
+ alpha_soil (slope inclination) and beta_soil (azimuth of slope normal),
  calculate the flipped coordinate system of the plane (i.e. a coordinate system
  for rays generated from the sky towards the Earth)
  By default we assume:
@@ -68,13 +69,14 @@ rotatez(x) = CT.LinearMap(Rotations.RotZ(x))
  Y axis points towards East (azimuth of pi/2 radians)
  Z axis points towards zenith (away from ground)
  Φ clockwise looking against Z - East is positive
- θ counterclock wise - 0 = Zenith, Sunrise = pi/2
- α is the angle between the X axis and the North-South axis (i.e. the azimuth of X axis)
- For example: α = pi/2 means the X axis points towards East and Y axis points towards North
- PGP = PlantGeomPrimtives.jl package (just generates unit vectors of a Cartesian system)
+ θ counterclockwise - 0 = Zenith, Sunrise = pi/2
+ α is the geocentric azimuth of the X axis (e.g. α = pi/2 means X points East)
+ alpha_soil is the inclination of the slope (0 = horizontal, pi/2 = vertical)
+ beta_soil is the geocentric azimuth of the slope normal (e.g. pi = south-facing slope)
+ PGP = PlantGeomPrimitives.jl package (just generates unit vectors of a Cartesian system)
 =#
-function rotate_coordinates(θ::FT, Φ::FT, α = FT(π)) where {FT}
-    rot = rotatez(α - FT(π) - Φ) ∘ rotatey(-θ)
+function rotate_coordinates(θ::FT, Φ::FT, α = FT(π), alpha_soil = zero(FT), beta_soil = FT(π)) where {FT}
+    rot = rotatez(α - beta_soil) ∘ rotatey(-alpha_soil) ∘ rotatez(beta_soil - FT(π) - Φ) ∘ rotatey(-θ)
     (x = .-rot(PGP.X(FT)), y = .-rot(PGP.Y(FT)), z = .-rot(PGP.Z(FT)))
 end
 
