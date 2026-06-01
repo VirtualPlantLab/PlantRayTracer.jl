@@ -23,7 +23,7 @@ struct FixedSource{FT} <: SourceAngle
     dir::PGP.Vec{FT}
 end
 function FixedSource(θ, Φ::Real, α = π, alpha_soil = 0.0, beta_soil = π)
-    FixedSource(rotate_coordinates(FT(θ), FT(Φ), FT(α), FT(alpha_soil), FT(beta_soil)).z)
+    FixedSource(rotate_coordinates(θ, Φ, α, alpha_soil, beta_soil).z)
 end
 generate_direction(a::FixedSource, rng) = a.dir
 
