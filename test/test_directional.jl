@@ -12,7 +12,7 @@ import PlantGeomPrimitives as PGP
     function check_cos(dir, θ::FT, Φ::FT, alpha_soil = zero(FT), beta_soil = FT(π)) where {FT} 
         actual_cos = dot(dir, PGP.Z())
         expected_cos = cos(alpha_soil)*cos(θ) + sin(alpha_soil)*sin(θ)*cos(Φ - beta_soil)
-        abs(actual_cos) - abs(expected_cos)
+        abs(actual_cos + expected_cos)
     end
 
     @testset "Sun directly overhead (θ=0)" begin
