@@ -78,7 +78,7 @@ import PlantGeomPrimitives as PGP
         for beta in [FT(0), FT(π/2), FT(π), FT(3π/2)]
             axes = RT.rotate_coordinates(FT(π/4), FT(π/3), FT(π), FT(0), beta)
             @test all(abs.(axes_ref.z .- axes.z) .< tol)
-            @show check_cos(axes.z, FT(π/4),FT(π/3), FT(0), beta)
+            @test check_cos(axes.z, FT(π/4),FT(π/3), FT(0), beta) < tol
         end
     end
 
@@ -87,7 +87,7 @@ import PlantGeomPrimitives as PGP
         # from the slope normal → equal South (+X) and downward (-Z) components in SCS.
         axes = RT.rotate_coordinates(FT(0), FT(0), FT(π), FT(π/4), FT(π))
         @test all(abs.(axes.z .- PGP.Vec(1/sqrt(2), 0, -1/sqrt(2))) .< tol)
-        @show check_cos(axes.z, FT(0), FT(0), FT(π/4), FT(π))
+        @test check_cos(axes.z, FT(0), FT(0), FT(π/4), FT(π)) < tol
     end
 
     @testset "Sun perpendicular to south-facing 45° slope" begin
@@ -95,7 +95,7 @@ import PlantGeomPrimitives as PGP
         # Ray should be straight into the slope normal: z = (0, 0, -1) in SCS.
         axes = RT.rotate_coordinates(FT(π/4), FT(π), FT(π), FT(π/4), FT(π))
         @test all(abs.(axes.z .- PGP.Vec(0, 0, -1)) .< tol)
-        @show check_cos(axes.z, FT(π/4), FT(π), FT(π/4), FT(π))
+        @test check_cos(axes.z, FT(π/4), FT(π), FT(π/4), FT(π)) < tol
     end
 
     @testset "East-horizon sun on NS-tilted slope equals flat result" begin
@@ -104,7 +104,7 @@ import PlantGeomPrimitives as PGP
         axes_flat   = RT.rotate_coordinates(FT(π/2), FT(π/2))
         axes_tilted = RT.rotate_coordinates(FT(π/2), FT(π/2), FT(π), FT(π/4), FT(π))
         @test all(abs.(axes_flat.z .- axes_tilted.z) .< tol)
-        @show check_cos(axes_tilted.z, FT(π/2), FT(π/2), FT(π/4), FT(π))
+        @test check_cos(axes_tilted.z, FT(π/2), FT(π/2), FT(π/4), FT(π)) < tol
     end
 
     @testset "North-facing 45° slope, sun overhead" begin
@@ -112,7 +112,7 @@ import PlantGeomPrimitives as PGP
         # side → equal North (-X) and downward (-Z) components in SCS.
         axes = RT.rotate_coordinates(FT(0), FT(0), FT(π), FT(π/4), FT(0))
         @test all(abs.(axes.z .- PGP.Vec(-1/sqrt(2), 0, -1/sqrt(2))) .< tol)
-        @show check_cos(axes.z, FT(0), FT(0), FT(π/4), FT(0))
+        @test check_cos(axes.z, FT(0), FT(0), FT(π/4), FT(0)) < tol
     end
 
     @testset "Orthonormality for tilted surfaces" begin
@@ -136,7 +136,43 @@ import PlantGeomPrimitives as PGP
         # have ray components along -Y (South in this frame) and -Z in SCS.
         axes = RT.rotate_coordinates(FT(0), FT(0), FT(π/2), FT(π/4), FT(π))
         @test all(abs.(axes.z .- PGP.Vec(0, -1/sqrt(2), -1/sqrt(2))) .< tol)
-        @show check_cos(axes.z, FT(0), FT(0), FT(π/4), FT(π))
+        @test check_cos(axes.z, FT(0), FT(0), FT(π/4), FT(π)) < tol
+    end
+
+    @testset "Float32 and mixed-precision inputs" begin
+        tol32 = 1f-5
+
+        # All five arguments Float32 → output is Vec{Float32}
+        axes = RT.rotate_coordinates(Float32(0), Float32(0), Float32(π), Float32(0), Float32(π))
+        @test eltype(axes.z) == Float32
+        @test all(abs.(axes.z .- PGP.Vec(0f0, 0f0, -1f0)) .< tol32)
+
+        axes = RT.rotate_coordinates(Float32(π/2), Float32(0), Float32(π), Float32(0), Float32(π))
+        @test eltype(axes.z) == Float32
+        @test all(abs.(axes.z .- PGP.Vec(1f0, 0f0, 0f0)) .< tol32)
+
+        # Float32 axes are orthonormal (with relaxed tolerance)
+        axes = RT.rotate_coordinates(Float32(π/4), Float32(π/3), Float32(π), Float32(π/6), Float32(π))
+        @test eltype(axes.z) == Float32
+        @test abs(norm(axes.x) - 1) < tol32
+        @test abs(norm(axes.y) - 1) < tol32
+        @test abs(norm(axes.z) - 1) < tol32
+        @test abs(axes.x ⋅ axes.y) < tol32
+        @test abs(axes.x ⋅ axes.z) < tol32
+        @test abs(axes.y ⋅ axes.z) < tol32
+
+        # Float32 θ/Φ with Irrational α or beta_soil → Float64 (Irrational promotes to Float64)
+        axes = RT.rotate_coordinates(Float32(0), Float32(0), π, Float32(0), π)
+        @test eltype(axes.z) == Float64
+
+        # Float32 θ/Φ with the default alpha_soil=0.0 (Float64) → Float64
+        axes = RT.rotate_coordinates(Float32(0), Float32(0))
+        @test eltype(axes.z) == Float64
+
+        # Mixed Float32/Float64 → Float64
+        axes = RT.rotate_coordinates(Float32(π/2), 0.0, Float32(π), Float32(0), Float32(π))
+        @test eltype(axes.z) == Float64
+        @test all(abs.(axes.z .- PGP.Vec(1.0, 0.0, 0.0)) .< 1e-7)
     end
 
 end

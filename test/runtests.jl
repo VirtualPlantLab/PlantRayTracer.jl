@@ -38,6 +38,6 @@ end
 end
 
 # Test scenes that do not have the standard North-South orientation
-@testset "Directions" begin
+@testset "Row and slope orientation" begin
     include("test_directional.jl")
 end
