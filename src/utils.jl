@@ -53,17 +53,32 @@ function project(p, pp, pn)
     p .- dist .* pn
 end
 
-# Help write coordinate transformations
+# Help write coordinate transformations (CT = CoordinateTransformations.jl)
 translate(x, y, z) = CT.Translation(x, y, z)
 rotatex(x) = CT.LinearMap(Rotations.RotX(x))
 rotatey(x) = CT.LinearMap(Rotations.RotY(x))
 rotatez(x) = CT.LinearMap(Rotations.RotZ(x))
 
-# Given angles θ and Φ, calculate the flipped coordinate system of the plane
-# Φ clockwise looking against Z - East is positive
-# θ counterclock wise looking against Y - Sunrise is positive
-function rotate_coordinates(θ::FT, Φ::FT) where {FT}
-    rot = rotatez(-Φ) ∘ rotatex(-θ)
+#=
+ Given angles θ (solar zenith), Φ (solar azimuth), α (azimuth of X axis),
+ alpha_soil (slope inclination) and beta_soil (azimuth of slope normal),
+ calculate the flipped coordinate system of the plane (i.e. a coordinate system
+ for rays generated from the sky towards the Earth)
+ By default we assume:
+ X axis points towards South (azimuth of pi radians)
+ Y axis points towards East (azimuth of pi/2 radians)
+ Z axis points towards zenith (away from ground)
+ Φ clockwise looking against Z - East is positive
+ θ counterclockwise - 0 = Zenith, Sunrise = pi/2
+ α is the geocentric azimuth of the X axis (e.g. α = pi/2 means X points East)
+ alpha_soil is the inclination of the slope (0 = horizontal, pi/2 = vertical)
+ beta_soil is the geocentric azimuth of the slope normal (e.g. pi = south-facing slope)
+ PGP = PlantGeomPrimitives.jl package (just generates unit vectors of a Cartesian system)
+=#
+function rotate_coordinates(θ, Φ, α = π, alpha_soil = 0.0, beta_soil = π)
+    # To deal with Irrational and different precision levels
+    FT = promote_type(typeof(θ), typeof(Φ), typeof(α), typeof(alpha_soil), typeof(beta_soil))
+    rot = rotatez(α - beta_soil) ∘ rotatey(-alpha_soil) ∘ rotatez(beta_soil - FT(π) - Φ) ∘ rotatey(-θ)
     (x = .-rot(PGP.X(FT)), y = .-rot(PGP.Y(FT)), z = .-rot(PGP.Z(FT)))
 end
 

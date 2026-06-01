@@ -2,15 +2,16 @@
 # DirectionalSource
 
 """
-    DirectionalSource(box::AABB; θ, Φ, radiosity, nrays)
-    DirectionalSource(mesh::Mesh; θ, Φ, radiosity, nrays)
+    DirectionalSource(box::AABB; θ, Φ, α = π, alpha_soil = 0, beta_soil = π, radiosity, nrays)
+    DirectionalSource(mesh::Mesh; θ, Φ, α = π, alpha_soil = 0, beta_soil = π, radiosity, nrays)
 
 Create a Directional source (including geometry and angle components) by providing an axis-aligned
-bounding box (`box`) or an `Mesh` object  as well as the zenith (`θ`) and azimuth (`Φ`)
-angles, the radiosity of the source projected on the horizontal plane and the number of
-rays to be generated. Directional sources may generate incorrect results in the absence of
-a grid cloner that extends the mesh. This is because the rays are generated from the upper
-face of the mesh's bounding box. See VPL documentation for details on light sources.
+bounding box (`box`) or an `Mesh` object as well as the zenith (`θ`), azimuth (`Φ`), azimuth of
+X axis (`α`), slope inclination (`alpha_soil`) and azimuth of slope normal (`beta_soil`) angles,
+the radiosity of the source projected on the horizontal plane and the number of rays to be
+generated. Directional sources may generate incorrect results in the absence of a grid cloner
+that extends the mesh. This is because the rays are generated from the upper face of the mesh's
+bounding box. See VPL documentation for details on light sources.
 
 ## Examples
 ```jldoctest
@@ -18,19 +19,19 @@ julia> using PlantGeomPrimitives;
 
 julia> mesh = Ellipse();
 
-julia> source = DirectionalSource(mesh, θ = 0.0, Φ = 0.0, radiosity = 1.0, nrays = 1_000);
+julia> source = DirectionalSource(mesh, θ = 0.0, Φ = 0.0, α = π, radiosity = 1.0, nrays = 1_000);
 ```
 """
-function DirectionalSource(box::AABB; θ, Φ, radiosity, nrays)
+function DirectionalSource(box::AABB; θ, Φ, α =  π, alpha_soil = 0.0, beta_soil = π, radiosity, nrays)
     dir_geom = create_directional(box)
     # Radiosity is projected onto horizontal plane as we sample from the top of the bounding box
     # The code below ensures that we get the right irradiance onto the mesh
     power = radiosity .* area(dir_geom)
-    out = Source(dir_geom, FixedSource(θ, Φ), power./nrays, nrays)
+    out = Source(dir_geom, FixedSource(θ, Φ, α, alpha_soil, beta_soil), power./nrays, nrays)
 end
-function DirectionalSource(mesh::PGP.Mesh; θ, Φ, radiosity, nrays)
+function DirectionalSource(mesh::PGP.Mesh; θ, Φ, α = π, alpha_soil = 0.0, beta_soil = π, radiosity, nrays)
     box = AABB(mesh)
-    DirectionalSource(box, θ = θ, Φ = Φ, radiosity = radiosity, nrays = nrays)
+    DirectionalSource(box, θ = θ, Φ = Φ, α = α, alpha_soil = alpha_soil, beta_soil = beta_soil, radiosity = radiosity, nrays = nrays)
 end
 
 # Upper face of the mesh's AABB

@@ -4,10 +4,11 @@
 
 """
     FixedSource(dir)
-    FixedSource(θ, Φ)
+    FixedSource(θ, Φ, α = π, alpha_soil = 0, beta_soil = π)
 
 Create a fixed irradiance source by given a vector with the direction of the
-rays (dir) or zenith (θ) and azimuth (Φ) angles.
+rays (dir) or zenith (θ), azimuth (Φ), azimuth of X axis (α), slope inclination
+(alpha_soil) and azimuth of slope normal (beta_soil) angles.
 
 ## Examples
 ```jldoctest
@@ -21,8 +22,8 @@ julia> source_dir = FixedSource(PG.Vec(0.0, 0.0, -1.0));
 struct FixedSource{FT} <: SourceAngle
     dir::PGP.Vec{FT}
 end
-function FixedSource(θ, Φ)
-    FixedSource(rotate_coordinates(θ, Φ).z)
+function FixedSource(θ, Φ::Real, α = π, alpha_soil = 0.0, beta_soil = π)
+    FixedSource(rotate_coordinates(θ, Φ, α, alpha_soil, beta_soil).z)
 end
 generate_direction(a::FixedSource, rng) = a.dir
 

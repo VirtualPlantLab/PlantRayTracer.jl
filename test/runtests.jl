@@ -36,3 +36,8 @@ end
 @testset "Shade nets" begin
     include("test_shade_net.jl")
 end
+
+# Test scenes that do not have the standard North-South orientation
+@testset "Row and slope orientation" begin
+    include("test_directional.jl")
+end
