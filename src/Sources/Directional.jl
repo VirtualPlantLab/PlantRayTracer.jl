@@ -19,17 +19,17 @@ julia> using PlantGeomPrimitives;
 
 julia> mesh = Ellipse();
 
-julia> source = DirectionalSource(mesh, θ = 0.0, Φ = 0.0, α = 0.0, radiosity = 1.0, nrays = 1_000);
+julia> source = DirectionalSource(mesh, θ = 0.0, Φ = 0.0, α = π, radiosity = 1.0, nrays = 1_000);
 ```
 """
-function DirectionalSource(box::AABB; θ, Φ, α = typeof(θ)(π), alpha_soil = zero(typeof(θ)), beta_soil = typeof(θ)(π), radiosity, nrays)
+function DirectionalSource(box::AABB; θ, Φ, α =  π, alpha_soil = 0.0, beta_soil = π, radiosity, nrays)
     dir_geom = create_directional(box)
     # Radiosity is projected onto horizontal plane as we sample from the top of the bounding box
     # The code below ensures that we get the right irradiance onto the mesh
     power = radiosity .* area(dir_geom)
     out = Source(dir_geom, FixedSource(θ, Φ, α, alpha_soil, beta_soil), power./nrays, nrays)
 end
-function DirectionalSource(mesh::PGP.Mesh; θ, Φ, α = typeof(θ)(π), alpha_soil = zero(typeof(θ)), beta_soil = typeof(θ)(π), radiosity, nrays)
+function DirectionalSource(mesh::PGP.Mesh; θ, Φ, α = π, alpha_soil = 0.0, beta_soil = π, radiosity, nrays)
     box = AABB(mesh)
     DirectionalSource(box, θ = θ, Φ = Φ, α = α, alpha_soil = alpha_soil, beta_soil = beta_soil, radiosity = radiosity, nrays = nrays)
 end

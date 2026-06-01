@@ -75,7 +75,9 @@ rotatez(x) = CT.LinearMap(Rotations.RotZ(x))
  beta_soil is the geocentric azimuth of the slope normal (e.g. pi = south-facing slope)
  PGP = PlantGeomPrimitives.jl package (just generates unit vectors of a Cartesian system)
 =#
-function rotate_coordinates(θ::FT, Φ::FT, α = FT(π), alpha_soil = zero(FT), beta_soil = FT(π)) where {FT}
+function rotate_coordinates(θ, Φ, α = π, alpha_soil = 0.0, beta_soil = π)
+    # To deal with Irrational and different precision levels
+    FT = promote_type(typeof(θ), typeof(Φ), typeof(α), typeof(alpha_soil), typeof(beta_soil))
     rot = rotatez(α - beta_soil) ∘ rotatey(-alpha_soil) ∘ rotatez(beta_soil - FT(π) - Φ) ∘ rotatey(-θ)
     (x = .-rot(PGP.X(FT)), y = .-rot(PGP.Y(FT)), z = .-rot(PGP.Z(FT)))
 end
