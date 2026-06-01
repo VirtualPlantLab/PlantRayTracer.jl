@@ -8,13 +8,19 @@ import PlantGeomPrimitives as PGP
     FT = Float64
     tol = 1e-10
 
-    # Auxilliary function to compute the cosine of the angle between PGP.
+    # Auxilliary function to compute the cosine of the angle of incidence
+    function check_cos(dir, θ::FT, Φ::FT, alpha_soil = zero(FT), beta_soil = FT(π)) where {FT} 
+        actual_cos = dot(dir, PGP.Z())
+        expected_cos = cos(alpha_soil)*cos(θ) + sin(alpha_soil)*sin(θ)*cos(Φ - beta_soil)
+        abs(actual_cos) - abs(expected_cos)
+    end
 
     @testset "Sun directly overhead (θ=0)" begin
         # At zenith = 0, azimuth doesn't matter - sun is straight up
         # The z axis of the local system should point down (-Z world)
         axes = RT.rotate_coordinates(FT(0), FT(0))
         @test all(abs.(axes.z .- PGP.Vec(0, 0, -1)) .< tol)
+        @test check_cos(axes.z, FT(0), FT(0)) < tol
     end
 
     @testset "Sun on horizon from North (θ=π/2, Φ=0)" begin
@@ -22,12 +28,14 @@ import PlantGeomPrimitives as PGP
         # The z axis of the new coordinated system (pointing from sun) should be along X
         axes = RT.rotate_coordinates(FT(π/2), FT(0))
         @test all(abs.(axes.z .- PGP.Vec(1, 0.0, 0)) .< tol)
+        @test check_cos(axes.z, FT(π/2), FT(0)) < tol
     end
 
     @testset "Sun on horizon from East (θ=π/2, Φ=π/2)" begin
         # Sun on horizon, azimuth=π/2 means East (Y axis direction)
         axes = RT.rotate_coordinates(FT(π/2), FT(π/2))
         @test all(abs.(axes.z .- PGP.Vec(0, -1, 0)) .< tol)
+        @test check_cos(axes.z, FT(π/2), FT(π/2)) < tol
     end
 
     @testset "Axes are orthonormal" begin
@@ -50,6 +58,7 @@ import PlantGeomPrimitives as PGP
             @test all(abs.(axes_orig.x .- axes_new.x) .< tol)
             @test all(abs.(axes_orig.y .- axes_new.y) .< tol)
             @test all(abs.(axes_orig.z .- axes_new.z) .< tol)
+            @test check_cos(axes_new.z, FT(θ), FT(Φ)) < tol
         end
     end
 
@@ -58,6 +67,7 @@ import PlantGeomPrimitives as PGP
         # Sun on horizon at Φ=0 (geographic North) should come from +Y, rays toward -Y.
         axes = RT.rotate_coordinates(FT(π/2), FT(0), FT(π/2))
         @test all(abs.(axes.z .- PGP.Vec(0, -1, 0)) .< tol)
+        @test check_cos(axes.z, FT(π/2), FT(0)) < tol
     end
 
     # --- Tilted surface (alpha_soil, beta_soil) ---
@@ -68,6 +78,7 @@ import PlantGeomPrimitives as PGP
         for beta in [FT(0), FT(π/2), FT(π), FT(3π/2)]
             axes = RT.rotate_coordinates(FT(π/4), FT(π/3), FT(π), FT(0), beta)
             @test all(abs.(axes_ref.z .- axes.z) .< tol)
+            @show check_cos(axes.z, FT(π/4),FT(π/3), FT(0), beta)
         end
     end
 
@@ -76,6 +87,7 @@ import PlantGeomPrimitives as PGP
         # from the slope normal → equal South (+X) and downward (-Z) components in SCS.
         axes = RT.rotate_coordinates(FT(0), FT(0), FT(π), FT(π/4), FT(π))
         @test all(abs.(axes.z .- PGP.Vec(1/sqrt(2), 0, -1/sqrt(2))) .< tol)
+        @show check_cos(axes.z, FT(0), FT(0), FT(π/4), FT(π))
     end
 
     @testset "Sun perpendicular to south-facing 45° slope" begin
@@ -83,6 +95,7 @@ import PlantGeomPrimitives as PGP
         # Ray should be straight into the slope normal: z = (0, 0, -1) in SCS.
         axes = RT.rotate_coordinates(FT(π/4), FT(π), FT(π), FT(π/4), FT(π))
         @test all(abs.(axes.z .- PGP.Vec(0, 0, -1)) .< tol)
+        @show check_cos(axes.z, FT(π/4), FT(π), FT(π/4), FT(π))
     end
 
     @testset "East-horizon sun on NS-tilted slope equals flat result" begin
@@ -91,6 +104,7 @@ import PlantGeomPrimitives as PGP
         axes_flat   = RT.rotate_coordinates(FT(π/2), FT(π/2))
         axes_tilted = RT.rotate_coordinates(FT(π/2), FT(π/2), FT(π), FT(π/4), FT(π))
         @test all(abs.(axes_flat.z .- axes_tilted.z) .< tol)
+        @show check_cos(axes_tilted.z, FT(π/2), FT(π/2), FT(π/4), FT(π))
     end
 
     @testset "North-facing 45° slope, sun overhead" begin
@@ -98,6 +112,7 @@ import PlantGeomPrimitives as PGP
         # side → equal North (-X) and downward (-Z) components in SCS.
         axes = RT.rotate_coordinates(FT(0), FT(0), FT(π), FT(π/4), FT(0))
         @test all(abs.(axes.z .- PGP.Vec(-1/sqrt(2), 0, -1/sqrt(2))) .< tol)
+        @show check_cos(axes.z, FT(0), FT(0), FT(π/4), FT(0))
     end
 
     @testset "Orthonormality for tilted surfaces" begin
@@ -121,6 +136,7 @@ import PlantGeomPrimitives as PGP
         # have ray components along -Y (South in this frame) and -Z in SCS.
         axes = RT.rotate_coordinates(FT(0), FT(0), FT(π/2), FT(π/4), FT(π))
         @test all(abs.(axes.z .- PGP.Vec(0, -1/sqrt(2), -1/sqrt(2))) .< tol)
+        @show check_cos(axes.z, FT(0), FT(0), FT(π/4), FT(π))
     end
 
 end
