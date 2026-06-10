@@ -34,10 +34,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **PlantRayTracer.jl** is a ray tracer for simulating light interception by plants, part of the [VirtualPlantLab](https://virtualplantlab.com) (VPL) ecosystem. It models light as rays interacting with triangulated meshes through physically-based materials (Lambertian, Phong, sensors), acceleration structures (BVH, Naive), and light sources (point, line, area, directional).
 
-- **Julia ≥ 1.12** required
-- **Package version:** 0.1.1
-- **Code style:** SciML (configured in `.JuliaFormatter.toml`)
-
 ### Key Design Patterns
 
 **Multi-wavelength via parametric types:** Materials and sources are parameterized by `nw` (number of wavelengths), stored as `SVector{nw, Float64}` from StaticArrays. This ensures type stability across wavelengths without dynamic dispatch.
