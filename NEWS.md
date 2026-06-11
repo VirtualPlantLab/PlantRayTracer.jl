@@ -2,6 +2,12 @@
 
 We started keeping track of changes in the `NEWS.md` file after version 0.1.0.
 
+# PlantRayTracer 1.0.1 (2026-06-11)
+
+All angles are now in hexadecimal degrees, both for public API and internal calculations.
+
+This affects `DirectionalSource` and `FixedSource` but also all internal calculations.
+
 # PlantRayTracer 1.0.0 (2026-06-10)
 
 No actual changes. We move to version 1.0.0 because:
