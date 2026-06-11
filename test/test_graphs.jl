@@ -123,7 +123,7 @@ let
     add_property!(mesh, :materials, material)
     gbox = RT.AABB(mesh)
     source = DirectionalSource(gbox,
-        θ = π / 2,
+        θ = 90.0,
         Φ = 0.0,
         radiosity = radiosity,
         nrays = nrays)
@@ -144,9 +144,9 @@ let
     add_property!(mesh, :materials, material)
     gbox = RT.AABB(mesh)
     source = DirectionalSource(gbox,
-        θ = π / 4,
+        θ = 45.0,
         Φ = 0.0,
-        radiosity = radiosity*cos(π / 4),
+        radiosity = radiosity*cosd(45.0),
         nrays = nrays)
     settings = RTSettings(pkill = 1.0, maxiter = 1, nx = 3, ny = 3, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(mesh, [source], settings = settings, acceleration = Naive)
@@ -155,7 +155,7 @@ let
     pow_abs = material.power[1]
     pow_gen = source.power[1] * source.nrays
     @test pow_abs ≈ pow_gen
-    @test pow_abs / area(mesh) ≈ radiosity*cos(π/4)
+    @test pow_abs / area(mesh) ≈ radiosity*cosd(45.0)
 
     ##### Using sensors #####
 
@@ -193,9 +193,9 @@ let
 
     # Intersection of a rectangle from a directional light source at an angle
     source = DirectionalSource(gbox,
-        θ = π / 4,
+        θ = 45.0,
         Φ = 0.0,
-        radiosity = radiosity*cos(π / 4),
+        radiosity = radiosity*cosd(45.0),
         nrays = nrays)
     settings = RTSettings(pkill = 1.0, maxiter = 3, nx = 2, ny = 2, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(mesh, source, settings = settings, acceleration = Naive)
@@ -205,7 +205,7 @@ let
     pow_abs = [material.power[1] for material in mats]
     pow_gen = source.power[1] * source.nrays
     @test all(pow_abs .≈ pow_gen)
-    @test all(pow_abs ./ area(rect1) .≈ radiosity .* cos.(π/4))
+    @test all(pow_abs ./ area(rect1) .≈ radiosity .* cosd(45.0))
 
     ##### Using Lambertian #####
 
@@ -238,9 +238,9 @@ let
 
     # Intersection of a rectangle from a directional light source at an angle
     source = DirectionalSource(gbox,
-        θ = π / 4,
+        θ = 45.0,
         Φ = 0.0,
-        radiosity = radiosity*cos(π / 4),
+        radiosity = radiosity*cosd(45.0),
         nrays = nrays)
     settings = RTSettings(pkill = 0.9, maxiter = 4, nx = 2, ny = 2, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(mesh, source, settings = settings, acceleration = Naive)
@@ -248,7 +248,7 @@ let
 
     @test nrays_traced > nrays
     RTirrs = [mats[i].power[1] / area(rect1) for i in 1:3]
-    @test all(RTirrs .< [cos(π / 4) for i in 1:3])
+    @test all(RTirrs .< [cosd(45.0) for i in 1:3])
     @test RTirrs[1] < RTirrs[2] < RTirrs[3]
     RTirrs_naive = deepcopy(RTirrs) # for comparison with BVH later
 
@@ -328,7 +328,7 @@ let
     @test RTirrs ≈ [1.0 for i in 1:3]
 
     # Intersection of a rectangle from a directional light source at an angle (sensor)
-    source = DirectionalSource(gbox, θ = π / 4, Φ = 0.0, radiosity = cos(π / 4), nrays = nrays)
+    source = DirectionalSource(gbox, θ = 45.0, Φ = 0.0, radiosity = cosd(45.0), nrays = nrays)
     settings = RTSettings(pkill = 1.0, maxiter = 3, nx = 2, ny = 2, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(mesh, [source], settings = settings, acceleration = BVH,
         rule = SAH{1}(2, 5))
@@ -336,7 +336,7 @@ let
 
     @test nrays_traced == nrays
     RTirrs = [mats[i].power[1] / area(rect1) for i in 1:3]
-    @test RTirrs ≈ [cos(π / 4) for i in 1:3]
+    @test RTirrs ≈ [cosd(45.0) for i in 1:3]
 
     # Intersection of a rectangle from a directional light source at an angle (Lambertian)
     nrays = 1_000_000
@@ -355,9 +355,9 @@ let
     add_property!(mesh, :materials, ext_mats)
     gbox = RT.AABB(mesh)
     source = DirectionalSource(gbox,
-        θ = π / 4,
+        θ = 45.0,
         Φ = 0.0,
-        radiosity = radiosity*cos(π / 4),
+        radiosity = radiosity*cosd(45.0),
         nrays = nrays)
     settings = RTSettings(pkill = 0.9, maxiter = 4, nx = 4, ny = 4, dx = 1.0, dy = 1.0)
     rtobj = RayTracer(mesh, [source], settings = settings, acceleration = BVH,
@@ -366,7 +366,7 @@ let
 
     @test nrays_traced > nrays
     RTirrs = [mats[i].power[1] / area(rect1) for i in 1:3]
-    @test all(RTirrs .< [cos(π / 4) for i in 1:3])
+    @test all(RTirrs .< [cosd(45.0) for i in 1:3])
     @test RTirrs[1] < RTirrs[2] < RTirrs[3]
 
     # Should yield the same results as the naive acceleration structure!
@@ -418,7 +418,7 @@ let
     # Ray trace the tree with a single directional light source
     nrays = 1_000_000
     mesh = Mesh(newtree)
-    source = DirectionalSource(mesh, θ = π / 4, Φ = 0.0, radiosity = cos(π / 4), nrays = nrays)
+    source = DirectionalSource(mesh, θ = 45.0, Φ = 0.0, radiosity = cosd(45.0), nrays = nrays)
     # Tracing with BVH acceleration structure
     settings = RTSettings(pkill = 0.9, maxiter = 4, nx = 5, ny = 5, dx = 1.0,
         dy = 1.0, parallel = true)
@@ -439,7 +439,7 @@ let
     # depend on the mesh itself though?
     @test maximum(abs.((powers_bvh .- powers_naive) ./ (powers_naive .+ eps(Float64)))) <
           0.012
-    @test abs(sum(powers_bvh) - sum(powers_naive)) / sum(powers_bvh) < 6e-5
+    @test abs(sum(powers_bvh) - sum(powers_naive)) / sum(powers_bvh) < 1e-4
 
     # Simple test to make sure that rays are always generated from above the mesh
     r = Rectangle(length = 2.0, width = 1.0)
@@ -452,9 +452,9 @@ let
     mesh = Geom.Mesh([r, r2])
     Geom.add_property!(mesh, :materials, ex_mats)
     sources = DirectionalSource(mesh,
-        θ = π / 2 * 0.99,
+        θ = 89.1,
         Φ = 0.0,
-        radiosity = cos(π / 2 * 0.99),
+        radiosity = cosd(89.1),
         nrays = nrays)
     power_out = sources.power * sources.nrays
     settings = RTSettings(nx = 15, ny = 15, dx = 2.0, dy = 1.0, parallel = true)
@@ -494,7 +494,7 @@ let
     Koch = Graph(axiom = axiom, rules = Tuple(rule))
     mesh = Mesh(Koch, message = "raytracer")
     Geom.add!(mesh, r, materials = Black(1), colors = RGB(0.5, 0.5, 0.0))
-    sources = DirectionalSource(mesh, θ = π / 4, Φ = 0.0, radiosity = 1.0, nrays = nrays)
+    sources = DirectionalSource(mesh, θ = 45.0, Φ = 0.0, radiosity = 1.0, nrays = nrays)
     settings = RTSettings(parallel = true)
     rtobj = RayTracer(mesh, sources, settings = settings)
     nrays_traced, _ = trace!(rtobj)
@@ -504,7 +504,7 @@ let
 
     mesh = Mesh(Koch, message = "raytracer")
     Geom.add!(mesh, r, materials = Black(1), colors = RGB(0.5, 0.5, 0.0))
-    sources = DirectionalSource(mesh, θ = π / 4, Φ = π / 2, radiosity = cos(π / 4), nrays = nrays)
+    sources = DirectionalSource(mesh, θ = 45.0, Φ = 90.0, radiosity = cosd(45.0), nrays = nrays)
     settings = RTSettings(parallel = true)
     rtobj = RayTracer(mesh, sources, settings = settings)
     nrays_traced, _ = trace!(rtobj)

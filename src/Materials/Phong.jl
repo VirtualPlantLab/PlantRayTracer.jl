@@ -58,13 +58,13 @@ Calculate the wavelength-weighted reflectance/transmittance of each type of inte
 This function actually performs sampling of angles (required for Phong calculations)
 =#
 function calculate_interaction(material::Phong, power, ray, intersection, rng)
-    Φ = 2 * π * rand(rng)
+    Φ = 360.0 * rand(rng)
     ρs, θ = calc_specular(material, intersection.axes, rng, ray.dir, Φ)
     mode, coef = choose_outcome(material, ρs, power, rng)
     if mode == ρs
         return (mode = mode, coef = coef, θ = θ, Φ = Φ)
     else
-        θ = acos(sqrt(rand(rng)))
+        θ = acosd(sqrt(rand(rng)))
         return (mode = mode, coef = coef, θ = θ, Φ = Φ)
     end
 end
@@ -115,7 +115,7 @@ function calc_specular(m::Phong{nw}, axes, rng, idir, Φ) where {nw}
         # Sample an angle from the Phong lobe
         θ = sample_phong(m, axes, rng, idir, Φ)
         # Estimator of specular reflectance (Lafortune & Willems, 1994)
-        coef = (m.n + 2) / (m.n + 1) * cos(θ)
+        coef = (m.n + 2) / (m.n + 1) * cosd(θ)
         ρs = m.ρsmax .* coef
         ρs = clamp.(ρs, ρ0, m.ρsmax)
         return (ρs = ρs, θ = θ)
@@ -156,9 +156,9 @@ function sample_phong(m::Phong, axes, rng, idir, Φ)
     e2 = normalize(e1 × axes.n)
     n = normalize(e2 × e1)
     # Calculate zenith angle with respect to reflection direction
-    α = acos(rand(rng)^(1 / (m.n + 1)))
+    α = acosd(rand(rng)^(1 / (m.n + 1)))
     # From polar to Cartessian
     dir = polar_to_cartesian((e1 = e1, e2 = e2, n = n), α, Φ)
     # Calculate θ
-    θ = acos(dir ⋅ axes.n)
+    θ = acosd(dir ⋅ axes.n)
 end

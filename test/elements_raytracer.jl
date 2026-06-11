@@ -237,22 +237,22 @@ let
     @test RT.generate_direction(source, rng) == source.dir
 
     # FixedSource: row orientation (α parameter)
-    # α=π is the default (rows North-South); sun on horizon from North → ray along +X
-    source = RT.FixedSource(π/2, 0.0, π)
+    # α=180 is the default (rows North-South); sun on horizon from North → ray along +X
+    source = RT.FixedSource(90.0, 0.0, 180.0)
     @test source.dir ≈ PGP.Vec(1, 0, 0)
-    # α=π/2 means rows East-West; same sun position shifts ray to -Y
-    source = RT.FixedSource(π/2, 0.0, π/2)
+    # α=90 means rows East-West; same sun position shifts ray to -Y
+    source = RT.FixedSource(90.0, 0.0, 90.0)
     @test source.dir ≈ PGP.Vec(0, -1, 0)
 
     # FixedSource: tilted soil surface (alpha_soil, beta_soil)
     # Flat surface (alpha_soil=0) reproduces the default result
-    source = RT.FixedSource(0.0, 0.0, π, 0.0, π)
+    source = RT.FixedSource(0.0, 0.0, 180.0, 0.0, 180.0)
     @test source.dir ≈ PGP.Vec(0, 0, -1.0)
     # South-facing 45° slope, overhead sun: ray enters at 45° to the slope normal
-    source = RT.FixedSource(0.0, 0.0, π, π/4, π)
+    source = RT.FixedSource(0.0, 0.0, 180.0, 45.0, 180.0)
     @test source.dir ≈ PGP.Vec(1/sqrt(2), 0, -1/sqrt(2))
     # Sun perpendicular to that slope: ray points straight into the slope normal
-    source = RT.FixedSource(π/4, π, π, π/4, π)
+    source = RT.FixedSource(45.0, 180.0, 180.0, 45.0, 180.0)
     @test source.dir ≈ PGP.Vec(0, 0, -1.0)
 
     # Lambertian source
@@ -301,16 +301,16 @@ let
     @test dsource.angle.dir ≈ PGP.Vec(0, 0, -1.0)
 
     # DirectionalSource: row orientation (α)
-    dsource = RT.DirectionalSource(gbox, θ = π/2, Φ = 0.0, α = π/2, radiosity = 1.0, nrays = 1_000)
+    dsource = RT.DirectionalSource(gbox, θ = 90.0, Φ = 0.0, α = 90.0, radiosity = 1.0, nrays = 1_000)
     @test dsource.angle.dir ≈ PGP.Vec(0, -1, 0)
 
     # DirectionalSource: tilted surface (alpha_soil, beta_soil)
-    dsource = RT.DirectionalSource(gbox, θ = 0.0, Φ = 0.0, alpha_soil = π/4, beta_soil = π, radiosity = 1.0, nrays = 1_000)
+    dsource = RT.DirectionalSource(gbox, θ = 0.0, Φ = 0.0, alpha_soil = 45.0, beta_soil = 180.0, radiosity = 1.0, nrays = 1_000)
     @test dsource.angle.dir ≈ PGP.Vec(1/sqrt(2), 0, -1/sqrt(2))
 
     # DirectionalSource from Mesh with all new kwargs
     dmesh = PGP.Rectangle()
-    dsource = RT.DirectionalSource(dmesh, θ = 0.0, Φ = 0.0, α = π, alpha_soil = 0.0, beta_soil = π, radiosity = 1.0, nrays = 1_000)
+    dsource = RT.DirectionalSource(dmesh, θ = 0.0, Φ = 0.0, α = 180.0, alpha_soil = 0.0, beta_soil = 180.0, radiosity = 1.0, nrays = 1_000)
     @test dsource isa RT.Source
     @test dsource.angle.dir ≈ PGP.Vec(0, 0, -1.0)
 

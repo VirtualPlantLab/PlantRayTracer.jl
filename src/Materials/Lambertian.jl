@@ -54,8 +54,8 @@ Calculate the wavelength-weighted reflectance/transmittance of each type of inte
 This function actually performs sampling of angles (required for Phong calculations)
 =#
 function calculate_interaction(material::Lambertian, power, ray, intersection, rng)
-    Φ = 2π * rand(rng)
-    θ = acos(sqrt(rand(rng)))
+    Φ = 360.0 * rand(rng)
+    θ = acosd(sqrt(rand(rng)))
     mode, coef = choose_outcome(material, power, rng)
     return (mode = mode, coef = coef, θ = θ, Φ = Φ)
 end
