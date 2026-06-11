@@ -4,11 +4,12 @@
 
 """
     FixedSource(dir)
-    FixedSource(θ, Φ, α = π, alpha_soil = 0, beta_soil = π)
+    FixedSource(θ, Φ, α = 180, alpha_soil = 0, beta_soil = 180)
 
 Create a fixed irradiance source by given a vector with the direction of the
 rays (dir) or zenith (θ), azimuth (Φ), azimuth of X axis (α), slope inclination
-(alpha_soil) and azimuth of slope normal (beta_soil) angles.
+(alpha_soil) and azimuth of slope normal (beta_soil) angles. All angles are in
+degrees.
 
 ## Examples
 ```jldoctest
@@ -22,7 +23,7 @@ julia> source_dir = FixedSource(PG.Vec(0.0, 0.0, -1.0));
 struct FixedSource{FT} <: SourceAngle
     dir::PGP.Vec{FT}
 end
-function FixedSource(θ, Φ::Real, α = π, alpha_soil = 0.0, beta_soil = π)
+function FixedSource(θ, Φ::Real, α = 180.0, alpha_soil = 0.0, beta_soil = 180.0)
     FixedSource(rotate_coordinates(θ, Φ, α, alpha_soil, beta_soil).z)
 end
 generate_direction(a::FixedSource, rng) = a.dir
@@ -54,7 +55,7 @@ end
 LambertianSource(axes) = LambertianSource(axes...)
 
 function generate_direction(a::LambertianSource{FT}, rng) where {FT}
-    Φ = FT(2) * FT(π) * rand(rng, FT)
-    θ = acos(sqrt(rand(rng, FT)))
+    Φ = FT(360) * rand(rng, FT)
+    θ = acosd(sqrt(rand(rng, FT)))
     polar_to_cartesian((e1 = a.x, e2 = a.y, n = a.z), θ, Φ)
 end

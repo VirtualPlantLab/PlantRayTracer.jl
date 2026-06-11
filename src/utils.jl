@@ -36,12 +36,12 @@ rho(vals...) = SA.SVector(vals)
 ###############################################################################
 
 # Calculate direction unit vector on Cartesian system axes from the
-# angles θ and  Φ
+# angles θ and Φ (in degrees)
 function polar_to_cartesian(axes, θ, Φ)
     e1, e2, n = axes
-    dir1 = @. n * cos(θ)
-    dir2 = @. e1 * cos(Φ) * sin(θ)
-    dir3 = @. e2 * sin(Φ) * sin(θ)
+    dir1 = @. n * cosd(θ)
+    dir2 = @. e1 * cosd(Φ) * sind(θ)
+    dir3 = @. e2 * sind(Φ) * sind(θ)
     dir = @. dir1 + dir2 + dir3
     PGP.Vec(normalize(dir))
 end
@@ -63,22 +63,22 @@ rotatez(x) = CT.LinearMap(Rotations.RotZ(x))
  Given angles θ (solar zenith), Φ (solar azimuth), α (azimuth of X axis),
  alpha_soil (slope inclination) and beta_soil (azimuth of slope normal),
  calculate the flipped coordinate system of the plane (i.e. a coordinate system
- for rays generated from the sky towards the Earth)
- By default we assume:
- X axis points towards South (azimuth of pi radians)
- Y axis points towards East (azimuth of pi/2 radians)
+ for rays generated from the sky towards the Earth).
+ All angles are in degrees. By default we assume:
+ X axis points towards South (azimuth of 180 degrees)
+ Y axis points towards East (azimuth of 90 degrees)
  Z axis points towards zenith (away from ground)
  Φ clockwise looking against Z - East is positive
- θ counterclockwise - 0 = Zenith, Sunrise = pi/2
- α is the geocentric azimuth of the X axis (e.g. α = pi/2 means X points East)
- alpha_soil is the inclination of the slope (0 = horizontal, pi/2 = vertical)
- beta_soil is the geocentric azimuth of the slope normal (e.g. pi = south-facing slope)
+ θ counterclockwise - 0 = Zenith, Sunrise = 90
+ α is the geocentric azimuth of the X axis (e.g. α = 90 means X points East)
+ alpha_soil is the inclination of the slope (0 = horizontal, 90 = vertical)
+ beta_soil is the geocentric azimuth of the slope normal (e.g. 180 = south-facing slope)
  PGP = PlantGeomPrimitives.jl package (just generates unit vectors of a Cartesian system)
 =#
-function rotate_coordinates(θ, Φ, α = π, alpha_soil = 0.0, beta_soil = π)
-    # To deal with Irrational and different precision levels
+function rotate_coordinates(θ, Φ, α = 180.0, alpha_soil = 0.0, beta_soil = 180.0)
+    # To deal with different precision levels
     FT = promote_type(typeof(θ), typeof(Φ), typeof(α), typeof(alpha_soil), typeof(beta_soil))
-    rot = rotatez(α - beta_soil) ∘ rotatey(-alpha_soil) ∘ rotatez(beta_soil - FT(π) - Φ) ∘ rotatey(-θ)
+    rot = rotatez(deg2rad(α - beta_soil)) ∘ rotatey(deg2rad(-alpha_soil)) ∘ rotatez(deg2rad(beta_soil - FT(180) - Φ)) ∘ rotatey(deg2rad(-θ))
     (x = .-rot(PGP.X(FT)), y = .-rot(PGP.Y(FT)), z = .-rot(PGP.Z(FT)))
 end
 
